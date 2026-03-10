@@ -1487,9 +1487,17 @@ const firebaseConfig = {
   appId: "1:879499719308:web:23856a5fcdf308b7ab81a9"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-window._db = db;
+// Safe Firebase init
+let db;
+try {
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  // Enable offline persistence for mobile
+  db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+  window._db = db;
+} catch(e) {
+  console.error('Firebase init error:', e);
+}
 
 // ── FIREBASE CRUD HELPERS ──
 window.fbSave = async function(colName, id, data) {
@@ -1509,16 +1517,24 @@ window.fbGetAll = async function(colName) {
   } catch(e) { console.error('fbGetAll error:', e); return []; }
 };
 window.fbListen = function(colName, callback) {
-  return db.collection(colName).onSnapshot(snap => {
-    const data = snap.docs.map(d => ({...d.data(), _docId: d.id}));
-    callback(data);
-  });
+  try {
+    return db.collection(colName).onSnapshot(
+      snap => { const data = snap.docs.map(d => ({...d.data(), _docId: d.id})); callback(data); },
+      err  => { console.warn('Listener error ('+colName+'):', err); }
+    );
+  } catch(e) { console.warn('fbListen setup error:', e); }
 };
 
 // ── LOAD ALL DATA FROM FIRESTORE ON START ──
 window._fbReady = false;
 async function loadAllFromFirebase() {
   showLoadingOverlay(true);
+  // Timeout fallback — kung >15s pa rin loading, ipakita error
+  const timeout = setTimeout(() => {
+    showLoadingOverlay(false);
+    showToast('⚠️ Mabagal ang koneksyon. I-refresh ang page.');
+  }, 15000);
+
   try {
     const [recs, secs, insps, accs, rs] = await Promise.all([
       window.fbGetAll('records'),
@@ -1527,6 +1543,7 @@ async function loadAllFromFirebase() {
       window.fbGetAll('accounts'),
       window.fbGetAll('settings'),
     ]);
+    clearTimeout(timeout);
     records     = recs.sort((a,b) => (b.id||0) - (a.id||0));
     sections    = secs;
     inspections = insps.sort((a,b) => (b.id||0) - (a.id||0));
@@ -1537,18 +1554,20 @@ async function loadAllFromFirebase() {
     await seedSections(); await seedRecords(); await seedInspections();
     showLoadingOverlay(false);
     if (window._wasteUser) { renderDashboard(); }
+
+    // Start real-time listeners AFTER initial load is done
+    window.fbListen('records',     data => { records     = data.sort((a,b)=>(b.id||0)-(a.id||0)); if(window._wasteUser) tryRefreshCurrentPage(); });
+    window.fbListen('sections',    data => { sections    = data; if(window._wasteUser) tryRefreshCurrentPage(); });
+    window.fbListen('inspections', data => { inspections = data.sort((a,b)=>(b.id||0)-(a.id||0)); if(window._wasteUser) tryRefreshCurrentPage(); });
+    window.fbListen('accounts',    data => { if(data.length) ACCOUNTS = data; });
+
   } catch(e) {
+    clearTimeout(timeout);
     showLoadingOverlay(false);
-    showToast('⚠️ Firebase load error: ' + e.message);
+    showToast('⚠️ Firebase error: ' + e.message);
     console.error(e);
   }
 }
-
-// ── REAL-TIME LISTENERS (sync across devices) ──
-window.fbListen('records',     data => { records     = data.sort((a,b)=>(b.id||0)-(a.id||0)); if(window._wasteUser) tryRefreshCurrentPage(); });
-window.fbListen('sections',    data => { sections    = data; if(window._wasteUser) tryRefreshCurrentPage(); });
-window.fbListen('inspections', data => { inspections = data.sort((a,b)=>(b.id||0)-(a.id||0)); if(window._wasteUser) tryRefreshCurrentPage(); });
-window.fbListen('accounts',    data => { if(data.length) ACCOUNTS = data; });
 
 window.tryRefreshCurrentPage = function() {
   const active = document.querySelector('.page.active');
@@ -1561,8 +1580,8 @@ window.tryRefreshCurrentPage = function() {
   if(id==='reports')     renderReports();
 };
 
-// Start loading
-loadAllFromFirebase();
+// Wait for DOM to be ready before loading
+document.addEventListener('DOMContentLoaded', () => loadAllFromFirebase());
 </script>
 
 <script>
