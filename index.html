@@ -1474,11 +1474,11 @@ function showLoadingOverlay(show) {
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
-<!-- Firebase SDKs -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, addDoc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!-- Firebase Compat SDKs (works in ALL browsers including FB Messenger, in-app browsers) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyDf4sGTh-cyprTNu_-gffZgh2QjKXMiPU8",
   authDomain: "wastesegregation-84a85.firebaseapp.com",
@@ -1488,41 +1488,29 @@ const firebaseConfig = {
   appId: "1:879499719308:web:23856a5fcdf308b7ab81a9"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 window._db = db;
-window._fbModules = { collection, doc, getDocs, addDoc, setDoc, deleteDoc, onSnapshot, query, orderBy };
 
 // ── FIREBASE CRUD HELPERS ──
 window.fbSave = async function(colName, id, data) {
   try {
-    const { doc, setDoc } = window._fbModules;
-    await setDoc(doc(window._db, colName, String(id)), data);
+    await db.collection(colName).doc(String(id)).set(data);
   } catch(e) { console.error('fbSave error:', e); showToast('⚠️ Save error: ' + e.message); }
-};
-window.fbAdd = async function(colName, data) {
-  try {
-    const { collection, addDoc } = window._fbModules;
-    const ref = await addDoc(collection(window._db, colName), data);
-    return ref.id;
-  } catch(e) { console.error('fbAdd error:', e); showToast('⚠️ Save error: ' + e.message); }
 };
 window.fbDelete = async function(colName, id) {
   try {
-    const { doc, deleteDoc } = window._fbModules;
-    await deleteDoc(doc(window._db, colName, String(id)));
+    await db.collection(colName).doc(String(id)).delete();
   } catch(e) { console.error('fbDelete error:', e); }
 };
 window.fbGetAll = async function(colName) {
   try {
-    const { collection, getDocs } = window._fbModules;
-    const snap = await getDocs(collection(window._db, colName));
+    const snap = await db.collection(colName).get();
     return snap.docs.map(d => ({...d.data(), _docId: d.id}));
   } catch(e) { console.error('fbGetAll error:', e); return []; }
 };
 window.fbListen = function(colName, callback) {
-  const { collection, onSnapshot } = window._fbModules;
-  return onSnapshot(collection(window._db, colName), snap => {
+  return db.collection(colName).onSnapshot(snap => {
     const data = snap.docs.map(d => ({...d.data(), _docId: d.id}));
     callback(data);
   });
@@ -1544,11 +1532,9 @@ async function loadAllFromFirebase() {
     sections    = secs;
     inspections = insps.sort((a,b) => (b.id||0) - (a.id||0));
     if (accs.length) ACCOUNTS = accs;
-    // Load report settings if saved
     const rsSaved = rs.find(x => x._docId === 'report_settings');
     if (rsSaved) { delete rsSaved._docId; window._savedRS = rsSaved; }
     window._fbReady = true;
-    // Seed demo data if empty
     await seedSections(); await seedRecords(); await seedInspections();
     showLoadingOverlay(false);
     if (window._wasteUser) { renderDashboard(); }
@@ -1578,7 +1564,6 @@ window.tryRefreshCurrentPage = function() {
 
 // Start loading
 loadAllFromFirebase();
-
 </script>
 
 <script>
