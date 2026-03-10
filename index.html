@@ -1,0 +1,2834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waste Segregation Record System – DepEd</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --green:#2e7d32;--green-l:#66bb6a;--green-bg:#e8f5e9;--green-d:#1b5e20;
+  --blue:#1565c0;--blue-l:#42a5f5;--blue-bg:#e3f2fd;
+  --red:#c62828;--red-l:#ef5350;--red-bg:#ffebee;
+  --yellow:#f57f17;--yellow-l:#ffca28;--yellow-bg:#fffde7;
+  --purple:#6a1b9a;--purple-l:#ab47bc;--purple-bg:#f3e5f5;
+  --orange:#e65100;--orange-l:#ff8a65;--orange-bg:#fbe9e7;
+  --teal:#00695c;--teal-l:#4db6ac;--teal-bg:#e0f2f1;
+  --bg:#f4f6f9;--card:#fff;--border:#e0e0e0;
+  --text:#1a1a2e;--sub:#6b7280;
+  --radius:16px;--shadow:0 4px 24px rgba(0,0,0,0.09);
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── LOGIN SCREEN ── */
+#loginScreen{
+  display:flex;position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#e8f5e9 0%,#f1f8e9 50%,#e0f2f1 100%);
+  align-items:center;justify-content:center;
+  font-family:'Nunito',sans-serif;
+  overflow:hidden;
+}
+#loginScreen::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 20%,rgba(46,125,50,0.12) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 80%,rgba(0,105,92,0.08) 0%,transparent 60%);
+  pointer-events:none;
+}
+.login-card{
+  position:relative;z-index:1;
+  width:100%;max-width:400px;padding:0 20px;
+  text-align:center;
+}
+.login-logo-wrap{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:90px;height:90px;border-radius:22px;
+  background:white;
+  box-shadow:0 8px 32px rgba(46,125,50,0.25);
+  margin-bottom:14px;overflow:hidden;
+  border:3px solid rgba(46,125,50,0.25);
+}
+.login-logo-wrap img{width:100%;height:100%;object-fit:contain;}
+.login-logo-wrap .logo-fallback{font-size:2.5rem;}
+.login-school-name{
+  font-family:'Baloo 2',cursive;font-size:1.25rem;font-weight:800;
+  color:#1b5e20;line-height:1.25;margin-bottom:3px;
+  text-transform:uppercase;letter-spacing:0.03em;
+}
+.login-system-name{
+  font-size:0.7rem;color:#558b2f;
+  text-transform:uppercase;letter-spacing:0.15em;font-weight:700;
+  margin-bottom:24px;
+}
+.login-box{
+  background:#fff;border:1.5px solid rgba(46,125,50,0.2);
+  border-radius:18px;padding:28px 24px;
+  box-shadow:0 12px 40px rgba(46,125,50,0.12);
+}
+.login-box h2{
+  font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;
+  color:#1b5e20;margin-bottom:20px;letter-spacing:0.02em;
+}
+.login-field{margin-bottom:14px;text-align:left;}
+.login-field label{
+  display:block;font-size:0.68rem;font-weight:800;
+  color:#558b2f;text-transform:uppercase;
+  letter-spacing:0.1em;margin-bottom:5px;
+}
+.login-field input{
+  width:100%;padding:10px 13px;
+  background:#f9fbe7;border:1.5px solid #c5e1a5;
+  border-radius:9px;color:#1b5e20;
+  font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;
+  outline:none;transition:border-color .15s,background .15s;
+}
+.login-field input:focus{border-color:#43a047;background:#fff;}
+.login-field input::placeholder{color:#aed581;}
+.login-pass-wrap{position:relative;}
+.login-pass-wrap input{padding-right:40px;}
+.login-pass-toggle{
+  position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;
+  color:#81c784;font-size:1rem;padding:2px 4px;
+  line-height:1;transition:color .15s;
+}
+.login-pass-toggle:hover{color:#2e7d32;}
+.login-error{
+  margin-bottom:12px;padding:9px 13px;
+  background:#ffebee;border:1px solid #ef9a9a;
+  border-radius:8px;color:#c62828;font-size:0.8rem;font-weight:700;
+  display:none;align-items:center;gap:8px;text-align:left;
+}
+.login-error.show{display:flex;}
+.login-btn{
+  width:100%;padding:12px;margin-top:4px;
+  background:linear-gradient(135deg,#2e7d32,#43a047);
+  border:none;border-radius:10px;
+  color:#fff;font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;
+  cursor:pointer;letter-spacing:0.03em;
+  box-shadow:0 4px 16px rgba(46,125,50,0.3);
+  transition:all .15s;
+}
+.login-btn:hover{background:linear-gradient(135deg,#388e3c,#4caf50);transform:translateY(-1px);}
+.login-btn:active{transform:translateY(0);}
+.login-btn:disabled{background:#c8e6c9;color:#a5d6a7;cursor:not-allowed;transform:none;box-shadow:none;}
+.login-hint{
+  margin-top:14px;font-size:0.68rem;
+  color:#81c784;line-height:1.6;
+}
+.login-role-badge{
+  display:inline-block;padding:2px 8px;border-radius:99px;
+  font-size:0.65rem;font-weight:800;margin-top:6px;
+}
+.badge-admin{background:rgba(198,40,40,0.1);color:#c62828;}
+.badge-teacher{background:rgba(46,125,50,0.15);color:#2e7d32;}
+.badge-viewer{background:rgba(21,101,192,0.1);color:#1565c0;}
+.layout{display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:248px;flex-shrink:0;background:#0d1117;color:white;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto;border-right:1px solid rgba(255,255,255,0.07);}
+.sidebar-logo{padding:0;border-bottom:1px solid rgba(255,255,255,0.08);}
+/* ── TOP HEADER BAR (spans full width inside sidebar) ── */
+.sidebar-topbar{
+  display:flex;align-items:center;gap:11px;
+  padding:13px 16px 12px;
+  background:#13181f;
+}
+.sidebar-topbar .logo-box{
+  width:36px;height:36px;border-radius:9px;
+  background:#fff;overflow:hidden;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid rgba(102,187,106,0.35);
+}
+.sidebar-topbar .logo-box img{width:100%;height:100%;object-fit:contain;}
+.sidebar-topbar .school-info{flex:1;min-width:0;}
+.sidebar-topbar .school-info h2{
+  font-family:'Baloo 2',cursive;font-size:0.78rem;font-weight:800;
+  color:#e6edf3;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-transform:uppercase;letter-spacing:0.02em;
+}
+.sidebar-topbar .school-info p{
+  font-size:0.55rem;color:rgba(102,187,106,0.85);font-weight:700;
+  text-transform:uppercase;letter-spacing:0.07em;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.nav-group{padding:14px 10px 4px;font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;opacity:0.35;font-weight:800;color:#fff;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;margin:1px 8px;border-radius:10px;cursor:pointer;font-size:0.84rem;font-weight:700;transition:background 0.15s,opacity 0.15s;opacity:0.65;color:#e6edf3;}
+.nav-item:hover{background:rgba(255,255,255,0.08);opacity:1;}
+.nav-item.active{background:rgba(102,187,106,0.15);opacity:1;box-shadow:inset 3px 0 0 #66bb6a;color:#fff;}
+.nav-item .ni{font-size:1.05rem;width:22px;text-align:center;flex-shrink:0;}
+.sidebar-footer{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,0.07);font-size:0.6rem;opacity:0.3;text-align:center;line-height:1.7;color:#fff;}
+
+/* ── MAIN ── */
+.main{margin-left:248px;flex:1;display:flex;flex-direction:column;}
+.topbar{
+  background:#161b22;border-bottom:1px solid rgba(255,255,255,0.08);
+  padding:0 22px;height:46px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:40;box-shadow:0 2px 12px rgba(0,0,0,0.25);
+  flex-wrap:nowrap;min-width:0;
+}
+.topbar-title{font-family:'Baloo 2',cursive;font-size:0.95rem;font-weight:800;color:#8b949e;letter-spacing:0.01em;}
+.topbar-title span{color:#e6edf3;}
+.date-badge{background:rgba(21,101,192,0.18);color:#64b0f7;padding:5px 12px;border-radius:99px;font-size:0.7rem;font-weight:700;border:1px solid rgba(21,101,192,0.35);display:flex;align-items:center;gap:5px;}
+.topbar-chip{padding:5px 12px;border-radius:99px;font-size:0.7rem;font-weight:700;border:1px solid;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.topbar-chip.green{background:rgba(46,125,50,0.18);color:#66bb6a;border-color:rgba(46,125,50,0.4);}
+.topbar-chip.yellow{background:rgba(245,127,23,0.18);color:#ffca28;border-color:rgba(245,127,23,0.4);}
+
+/* ── PAGES ── */
+.page{display:none;padding:24px 28px 48px;}
+.page.active{display:block;}
+
+/* ── TABS (inside Add Record page) ── */
+.tab-bar{display:flex;gap:0;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:22px;width:fit-content;border:1.5px solid var(--border);}
+.tab-btn{padding:9px 22px;border-radius:9px;border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:0.84rem;font-weight:800;cursor:pointer;color:var(--sub);transition:all 0.18s;display:flex;align-items:center;gap:7px;}
+.tab-btn.active{background:white;color:var(--green);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.tab-btn:hover:not(.active){color:var(--text);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* ── STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:18px 18px 14px;box-shadow:var(--shadow);border-left:4px solid;transition:transform 0.18s;}
+.stat-card:hover{transform:translateY(-3px);}
+.stat-card.green{border-color:var(--green-l);}.stat-card.blue{border-color:var(--blue-l);}.stat-card.yellow{border-color:var(--yellow-l);}.stat-card.red{border-color:var(--red-l);}.stat-card.purple{border-color:var(--purple-l);}.stat-card.teal{border-color:var(--teal-l);}
+.stat-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.stat-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--sub);font-weight:700;}
+.stat-icon{font-size:1.4rem;}
+.stat-val{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;line-height:1;}
+.stat-unit{font-size:0.68rem;color:var(--sub);margin-top:2px;font-weight:600;}
+.stat-card.green .stat-val{color:var(--green);}.stat-card.blue .stat-val{color:var(--blue);}.stat-card.yellow .stat-val{color:var(--yellow);}.stat-card.red .stat-val{color:var(--red);}.stat-card.purple .stat-val{color:var(--purple);}.stat-card.teal .stat-val{color:var(--teal);}
+
+/* ── SECTION CARD ── */
+.sc{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;}
+.sc-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.sc-head h3{font-family:'Baloo 2',cursive;font-size:0.98rem;font-weight:800;display:flex;align-items:center;gap:8px;}
+.sc-body{padding:20px;}
+
+/* ── FORM ── */
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--sub);}
+.fg input,.fg select,.fg textarea{border:1.5px solid var(--border);border-radius:10px;padding:9px 12px;font-family:'Nunito',sans-serif;font-size:0.85rem;color:var(--text);background:var(--bg);transition:border-color 0.15s,box-shadow 0.15s;outline:none;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(46,125,50,0.1);}
+.fg input:disabled,.fg select:disabled{opacity:0.55;cursor:not-allowed;}
+
+/* ── BIN INPUTS ── */
+.bin-inputs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
+.bic{border-radius:12px;padding:14px 10px;text-align:center;border:2px solid;}
+.bic.green{background:var(--green-bg);border-color:var(--green-l);}.bic.blue{background:var(--blue-bg);border-color:var(--blue-l);}.bic.yellow{background:var(--yellow-bg);border-color:var(--yellow-l);}.bic.red{background:var(--red-bg);border-color:var(--red-l);}
+.bic .bi{font-size:1.7rem;margin-bottom:5px;}.bic .bn{font-size:0.65rem;font-weight:800;margin-bottom:7px;text-transform:uppercase;letter-spacing:0.05em;}
+.bic.green .bn{color:var(--green);}.bic.blue .bn{color:var(--blue);}.bic.yellow .bn{color:var(--yellow);}.bic.red .bn{color:var(--red);}
+.bic input{width:100%;border:1.5px solid;border-radius:8px;padding:7px;text-align:center;font-size:1rem;font-weight:800;font-family:'Nunito',sans-serif;outline:none;background:white;}
+.bic.green input{border-color:var(--green);color:var(--green);}.bic.blue input{border-color:var(--blue);color:var(--blue);}.bic.yellow input{border-color:var(--yellow);color:var(--yellow);}.bic.red input{border-color:var(--red);color:var(--red);}
+.bic .bu{font-size:0.62rem;color:var(--sub);margin-top:4px;font-weight:600;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:99px;font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:800;border:none;cursor:pointer;transition:all 0.18s;}
+.btn-primary{background:var(--green);color:white;box-shadow:0 4px 12px rgba(46,125,50,0.28);}
+.btn-primary:hover{background:var(--green-d);transform:translateY(-1px);box-shadow:0 6px 18px rgba(46,125,50,0.38);}
+.btn-teal{background:var(--teal);color:white;box-shadow:0 4px 12px rgba(0,105,92,0.22);}
+.btn-teal:hover{background:#004d40;transform:translateY(-1px);}
+.btn-purple{background:var(--purple);color:white;box-shadow:0 4px 12px rgba(106,27,154,0.22);}
+.btn-purple:hover{background:#4a148c;transform:translateY(-1px);}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);}
+.btn-outline:hover{background:var(--bg);}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1.5px solid var(--red-l);}
+.btn-danger:hover{background:var(--red);color:white;}
+.btn-edit{background:var(--blue-bg);color:var(--blue);border:1.5px solid var(--blue-l);}
+.btn-edit:hover{background:var(--blue);color:white;}
+.btn-sm{padding:5px 13px;font-size:0.73rem;}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+thead th{padding:10px 14px;text-align:left;background:var(--bg);font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--sub);font-weight:700;border-bottom:2px solid var(--border);}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s;}
+tbody tr:hover{background:#f9fafb;}
+tbody td{padding:10px 14px;font-weight:600;vertical-align:middle;}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.68rem;font-weight:800;}
+.badge-green{background:var(--green-bg);color:var(--green);}.badge-blue{background:var(--blue-bg);color:var(--blue);}.badge-yellow{background:var(--yellow-bg);color:var(--yellow);}.badge-red{background:var(--red-bg);color:var(--red);}.badge-purple{background:var(--purple-bg);color:var(--purple);}.badge-gray{background:#f3f4f6;color:#6b7280;}.badge-teal{background:var(--teal-bg);color:var(--teal);}
+.grade-chip{display:inline-block;padding:2px 10px;border-radius:6px;font-size:0.7rem;font-weight:800;background:var(--green-bg);color:var(--green);}
+
+/* ── CHART ── */
+.chart-row{display:flex;align-items:center;gap:12px;margin-bottom:13px;}
+.chart-label{width:150px;font-size:0.76rem;font-weight:700;flex-shrink:0;text-align:right;color:var(--text);}
+.chart-bar-bg{flex:1;background:var(--bg);border-radius:99px;height:22px;overflow:hidden;}
+.chart-bar{height:100%;border-radius:99px;transition:width 0.7s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;padding-left:10px;font-size:0.68rem;font-weight:800;color:white;white-space:nowrap;}
+.chart-val{width:55px;font-size:0.76rem;font-weight:800;flex-shrink:0;text-align:right;}
+.chart-bar.green{background:linear-gradient(90deg,var(--green),var(--green-l));}.chart-bar.blue{background:linear-gradient(90deg,var(--blue),var(--blue-l));}.chart-bar.yellow{background:linear-gradient(90deg,var(--yellow),var(--yellow-l));}.chart-bar.red{background:linear-gradient(90deg,var(--red),var(--red-l));}
+.weekly-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:130px;}
+.week-col{display:flex;flex-direction:column;align-items:center;height:100%;}
+.week-bars{display:flex;gap:2px;align-items:end;flex:1;width:100%;}
+.week-bar{flex:1;border-radius:3px 3px 0 0;min-height:3px;transition:height 0.5s ease;}
+.week-bar.green{background:var(--green-l);}.week-bar.blue{background:var(--blue-l);}.week-bar.yellow{background:var(--yellow-l);}.week-bar.red{background:var(--red-l);}
+
+/* ── SECTION MGMT CARDS ── */
+.section-list{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:900px){.section-list{grid-template-columns:repeat(2,1fr);}}
+.sl-card{background:var(--bg);border-radius:14px;padding:16px;border:1.5px solid var(--border);display:flex;flex-direction:column;gap:6px;transition:box-shadow 0.18s,border-color 0.18s;}
+.sl-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.1);border-color:var(--green-l);}
+.sl-card-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.sl-card-name{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:var(--text);}
+.sl-card-actions{display:flex;gap:6px;margin-top:4px;}
+
+/* ══════════════════════════════════════
+   INSPECTION CHECKLIST STYLES
+══════════════════════════════════════ */
+
+/* Score ring */
+.score-ring-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.score-ring{position:relative;width:110px;height:110px;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring-bg{fill:none;stroke:#e0e0e0;stroke-width:9;}
+.score-ring-fill{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 0.8s cubic-bezier(.34,1.56,.64,1),stroke 0.4s;}
+.score-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-ring-pct{font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;line-height:1;}
+.score-ring-label{font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--sub);}
+.score-ring-tag{font-size:0.75rem;font-weight:800;padding:3px 12px;border-radius:99px;}
+
+/* Checklist group */
+.cl-group{margin-bottom:22px;}
+.cl-group-title{font-family:'Baloo 2',cursive;font-size:0.95rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:2px solid var(--border);}
+.cl-items{display:flex;flex-direction:column;gap:8px;}
+
+/* Individual checklist item */
+.cl-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg);border-radius:12px;padding:12px 14px;
+  border:1.5px solid var(--border);
+  transition:border-color 0.15s,background 0.15s;
+  cursor:pointer;user-select:none;
+}
+.cl-item:hover{border-color:#bbb;}
+.cl-item.pass{background:var(--green-bg);border-color:var(--green-l);}
+.cl-item.fail{background:var(--red-bg);border-color:var(--red-l);}
+.cl-item.na{background:#f8f8f8;border-color:#ddd;opacity:0.6;}
+
+.cl-toggle{display:flex;gap:4px;flex-shrink:0;}
+.cl-btn{
+  width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);
+  background:white;font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;font-family:'Nunito',sans-serif;
+}
+.cl-btn:hover{transform:scale(1.1);}
+.cl-btn.pass-active{background:var(--green);border-color:var(--green);box-shadow:0 2px 8px rgba(46,125,50,0.4);}
+.cl-btn.fail-active{background:var(--red);border-color:var(--red);box-shadow:0 2px 8px rgba(198,40,40,0.4);}
+.cl-btn.na-active{background:#9e9e9e;border-color:#9e9e9e;}
+
+.cl-text{flex:1;}
+.cl-text strong{display:block;font-size:0.86rem;font-weight:800;color:var(--text);}
+.cl-text span{font-size:0.72rem;color:var(--sub);font-weight:600;}
+.cl-status-label{font-size:0.7rem;font-weight:800;padding:2px 10px;border-radius:99px;flex-shrink:0;}
+.pass .cl-status-label{background:var(--green);color:white;}
+.fail .cl-status-label{background:var(--red);color:white;}
+.na .cl-status-label{background:#9e9e9e;color:white;}
+
+/* Remarks per item */
+.cl-remark{
+  display:none;margin-top:6px;
+  border-top:1px dashed var(--border);padding-top:8px;
+}
+.cl-item.fail .cl-remark,.cl-item.pass .cl-remark{display:block;}
+.cl-remark input{width:100%;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:'Nunito',sans-serif;font-size:0.78rem;outline:none;background:white;}
+.cl-remark input:focus{border-color:var(--green);}
+
+/* Progress bar inside group header */
+.cl-group-progress{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.cl-group-score{font-size:0.72rem;font-weight:800;color:var(--sub);}
+.cl-mini-bar{width:60px;height:6px;background:#e0e0e0;border-radius:99px;overflow:hidden;}
+.cl-mini-fill{height:100%;border-radius:99px;transition:width 0.4s;}
+
+/* Inspection result banner */
+.result-banner{
+  border-radius:16px;padding:20px 24px;
+  display:flex;align-items:center;gap:20px;
+  margin-bottom:20px;
+}
+.result-banner.compliant{background:linear-gradient(135deg,var(--green-d),var(--green));color:white;}
+.result-banner.needs-improvement{background:linear-gradient(135deg,#e65100,#ff8a65);color:white;}
+.result-banner.non-compliant{background:linear-gradient(135deg,var(--red),#ef5350);color:white;}
+.result-banner .rb-icon{font-size:2.8rem;flex-shrink:0;}
+.result-banner .rb-title{font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800;}
+.result-banner .rb-sub{font-size:0.8rem;opacity:0.9;margin-top:2px;}
+.result-banner .rb-score{font-family:'Baloo 2',cursive;font-size:2.2rem;font-weight:800;margin-left:auto;flex-shrink:0;text-align:right;}
+.result-banner .rb-score-label{font-size:0.65rem;opacity:0.8;text-align:right;}
+
+/* Inspection log table status */
+.insp-pass{color:var(--green);font-weight:800;}
+.insp-ni{color:var(--orange);font-weight:800;}
+.insp-fail{color:var(--red);font-weight:800;}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.overlay.show{opacity:1;pointer-events:all;}
+.modal{background:white;border-radius:20px;width:92%;max-width:500px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.22);transform:scale(0.95);transition:transform 0.22s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;}
+.overlay.show .modal{transform:scale(1);}
+.modal h3{font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.modal-form{display:flex;flex-direction:column;gap:14px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:40px 20px;color:var(--sub);}
+.empty .ei{font-size:3rem;margin-bottom:10px;}
+.empty p{font-size:0.84rem;font-weight:600;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green-d);color:white;padding:12px 20px;border-radius:12px;font-weight:800;font-size:0.84rem;box-shadow:0 8px 24px rgba(0,0,0,0.2);display:flex;align-items:center;gap:8px;transform:translateY(80px);opacity:0;transition:all 0.3s cubic-bezier(.34,1.56,.64,1);z-index:999;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── AUTOFILL ── */
+.autofill-hint{font-size:0.68rem;color:var(--green);font-weight:700;margin-top:3px;display:none;}
+.autofill-hint.show{display:block;}
+
+@media print{
+  .sidebar,.topbar,.no-print{display:none!important;}
+  .main{margin-left:0;}
+  .page{display:block!important;padding:10px;}
+  body{background:white;}
+  .tab-content{display:block!important;}
+  .cl-btn{border:1px solid #ccc!important;background:white!important;}
+  .cl-item.pass .cl-btn.pass-active::after{content:'✓';}
+  .cl-item.fail .cl-btn.fail-active::after{content:'✗';}
+}
+
+/* ── PRINT REPORT STYLES ── */
+.print-report{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:32px 40px;max-width:900px;margin:0 auto 24px;}
+.print-report-header{text-align:center;border-bottom:3px solid var(--green);padding-bottom:18px;margin-bottom:24px;}
+.print-report-header h1{font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800;color:var(--green-d);text-transform:uppercase;margin:2px 0;}
+.print-report-header h2{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;color:var(--text);margin:2px 0;}
+.print-report-header .rpt-meta{font-size:0.75rem;color:var(--sub);font-weight:600;margin-top:6px;}
+.print-report-header .rpt-period{font-size:0.9rem;font-weight:800;color:var(--green);margin-top:4px;}
+.rpt-section-title{font-family:'Baloo 2',cursive;font-size:0.95rem;font-weight:800;color:var(--green-d);margin:20px 0 10px;padding:6px 12px;background:var(--green-bg);border-radius:8px;border-left:4px solid var(--green);}
+.rpt-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.rpt-sum-card{text-align:center;padding:14px;border-radius:12px;border:1.5px solid var(--border);}
+.rpt-sum-card .num{font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;}
+.rpt-sum-card .lbl{font-size:0.65rem;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;}
+.rpt-table{width:100%;border-collapse:collapse;font-size:0.78rem;margin-bottom:16px;}
+.rpt-table th{background:var(--green);color:white;padding:8px 10px;text-align:left;font-weight:800;font-size:0.7rem;text-transform:uppercase;}
+.rpt-table td{padding:7px 10px;border-bottom:1px solid var(--border);}
+.rpt-table tr:nth-child(even) td{background:#f9fafb;}
+.rpt-footer{margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+.rpt-sig-line{border-top:2px solid var(--text);padding-top:6px;text-align:center;font-size:0.72rem;font-weight:700;}
+.rpt-sig-title{font-size:0.65rem;color:var(--sub);font-weight:600;}
+
+/* ── CERTIFICATE STYLES ── */
+.cert-wrap{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:0;max-width:860px;margin:0 auto 24px;overflow:hidden;}
+.cert-outer{padding:20px;background:linear-gradient(135deg,#f0faf0,#e8f5e9,#fff);}
+.cert-inner{border:4px double var(--green-d);border-radius:12px;padding:36px 48px;position:relative;text-align:center;background:#fff;}
+.cert-inner::before{content:'';position:absolute;inset:8px;border:1.5px solid rgba(46,125,50,0.2);border-radius:8px;pointer-events:none;}
+.cert-logo-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px;}
+.cert-logo-row .seal{font-size:2.8rem;}
+.cert-school{font-family:'Baloo 2',cursive;font-size:0.78rem;font-weight:800;color:var(--green-d);text-transform:uppercase;letter-spacing:0.08em;}
+.cert-sub-school{font-size:0.62rem;color:var(--sub);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;}
+.cert-divider{width:120px;height:3px;background:linear-gradient(90deg,transparent,var(--green),transparent);margin:14px auto;}
+.cert-type-label{font-size:0.65rem;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:var(--sub);margin-bottom:4px;}
+.cert-title{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:var(--green-d);line-height:1.2;margin-bottom:8px;}
+.cert-body-text{font-size:0.88rem;color:#444;line-height:1.7;max-width:560px;margin:0 auto 12px;}
+.cert-recipient{font-family:'Baloo 2',cursive;font-size:1.7rem;font-weight:800;color:var(--green);border-bottom:3px solid var(--green-l);display:inline-block;padding:0 16px 4px;margin:8px 0 14px;}
+.cert-details{font-size:0.78rem;color:var(--sub);font-weight:600;margin-bottom:20px;}
+.cert-reason{font-size:0.82rem;color:#444;font-style:italic;max-width:500px;margin:0 auto 20px;padding:12px 20px;background:var(--green-bg);border-radius:10px;border-left:3px solid var(--green-l);}
+.cert-sigs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;margin-top:28px;}
+.cert-sig{text-align:center;}
+.cert-sig-line{border-top:2px solid var(--text);padding-top:6px;font-size:0.72rem;font-weight:800;color:var(--text);}
+.cert-sig-role{font-size:0.62rem;color:var(--sub);font-weight:600;}
+.cert-watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0.04;font-size:8rem;font-weight:900;color:var(--green-d);transform:rotate(-30deg);user-select:none;}
+.cert-ribbon{display:inline-block;background:linear-gradient(135deg,var(--green-d),var(--green));color:#fff;padding:6px 24px;border-radius:99px;font-size:0.72rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;margin-top:16px;}
+
+/* ── EMAIL MODAL ── */
+.email-preview{background:#f8f9fa;border:1.5px solid var(--border);border-radius:10px;padding:16px;font-size:0.78rem;line-height:1.7;color:var(--text);max-height:300px;overflow-y:auto;white-space:pre-wrap;margin-bottom:14px;}
+.email-status{padding:10px 14px;border-radius:8px;font-size:0.8rem;font-weight:700;display:none;}
+.email-status.success{background:var(--green-bg);color:var(--green);display:block;}
+.email-status.info{background:var(--blue-bg);color:var(--blue);display:block;}
+/* ── REPORT SETTINGS CHIPS ── */
+.rs-chip{padding:5px 13px;border-radius:99px;font-size:0.73rem;font-weight:800;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;}
+.rs-chip:hover{border-color:var(--green-l);color:var(--green);}
+.rs-chip-active{background:var(--red);border-color:var(--red);color:#fff !important;}
+
+/* ══════════════════════════════════════════════
+   MOBILE HAMBURGER BUTTON
+══════════════════════════════════════════════ */
+.mob-menu-btn{
+  display:none;
+  background:none;border:none;cursor:pointer;
+  padding:6px 8px;border-radius:8px;
+  color:#e6edf3;font-size:1.3rem;line-height:1;
+  transition:background .15s;flex-shrink:0;
+}
+.mob-menu-btn:hover{background:rgba(255,255,255,0.1);}
+
+/* ── SIDEBAR OVERLAY (mobile) ── */
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.5);z-index:49;
+}
+.sidebar-overlay.show{display:block;}
+
+/* ══════════════════════════════════════════════
+   BOTTOM NAV BAR (mobile only)
+══════════════════════════════════════════════ */
+.bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:#0d1117;border-top:1px solid rgba(255,255,255,0.1);
+  z-index:60;padding:0;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.35);
+}
+.bottom-nav-items{
+  display:flex;align-items:stretch;
+  overflow-x:auto;scrollbar-width:none;
+}
+.bottom-nav-items::-webkit-scrollbar{display:none;}
+.bnav-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;flex:1;min-width:58px;padding:8px 4px 10px;
+  cursor:pointer;color:rgba(255,255,255,0.45);
+  font-size:0.55rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:0.04em;border:none;background:none;
+  transition:color .15s,background .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.bnav-item .bni{font-size:1.25rem;line-height:1;}
+.bnav-item:hover,.bnav-item.active{
+  color:#66bb6a;background:rgba(102,187,106,0.08);
+}
+.bnav-item.active .bni{
+  filter:drop-shadow(0 0 6px rgba(102,187,106,0.7));
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+══════════════════════════════════════════════ */
+
+/* ── TABLET (≤ 1024px) ── */
+@media(max-width:1024px){
+  .sidebar{width:220px;}
+  .main{margin-left:220px;}
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .bin-inputs{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ── MOBILE (≤ 768px) ── */
+@media(max-width:768px){
+  /* Hide desktop sidebar, show bottom nav */
+  .sidebar{
+    transform:translateX(-100%);
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+    width:280px;z-index:60;
+  }
+  .sidebar.mobile-open{transform:translateX(0);}
+  .sidebar-overlay{display:none;}
+  .sidebar-overlay.show{display:block;}
+
+  .bottom-nav{display:block;}
+  .mob-menu-btn{display:flex;align-items:center;justify-content:center;}
+
+  /* Main shifts up, not left */
+  .main{margin-left:0;padding-bottom:72px;}
+
+  /* Topbar tweaks */
+  .topbar{padding:0 12px;height:50px;gap:8px;}
+  .topbar-title{font-size:0.8rem;}
+  .date-badge{display:none;}
+  .topbar-chip{font-size:0.65rem;padding:4px 9px;}
+
+  /* Pages */
+  .page{padding:14px 14px 80px;}
+
+  /* Stat cards: 2 col on mobile */
+  .stat-row{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+  .stat-val{font-size:1.6rem;}
+  .stat-card{padding:13px 13px 10px;}
+
+  /* Bin inputs: 2 col */
+  .bin-inputs{grid-template-columns:repeat(2,1fr);gap:10px;}
+
+  /* Dashboard grid → single col */
+  #page-dashboard > div[style*="grid-template-columns:1fr 1fr"]{
+    display:flex!important;flex-direction:column!important;gap:14px;
+  }
+
+  /* Analytics grid → single col */
+  #rtab-content-analytics > div[style*="grid-template-columns"]{
+    display:flex!important;flex-direction:column!important;gap:14px;
+  }
+
+  /* User mgmt grid → single col */
+  #page-usermgmt > div[style*="grid-template-columns:1fr 1fr"]{
+    display:flex!important;flex-direction:column!important;gap:14px;
+  }
+
+  /* Form grids → single col */
+  [style*="grid-template-columns:1fr 1fr 1fr"]{
+    display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+  }
+  [style*="grid-template-columns:1fr 1fr"]{
+    display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+  }
+  [style*="grid-template-columns:repeat(4,1fr)"]{
+    display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;
+  }
+  [style*="grid-template-columns:repeat(3,1fr)"]{
+    display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+  }
+
+  /* Section list */
+  .section-list{grid-template-columns:1fr 1fr;}
+
+  /* Tab bars */
+  .tab-bar{width:100%;overflow-x:auto;scrollbar-width:none;}
+  .tab-bar::-webkit-scrollbar{display:none;}
+  .tab-btn{white-space:nowrap;padding:8px 14px;font-size:0.78rem;}
+
+  /* SC head: allow wrap */
+  .sc-head{flex-wrap:wrap;gap:8px;padding:12px 14px;}
+  .sc-head h3{font-size:0.88rem;}
+  .sc-body{padding:14px;}
+
+  /* Charts: make labels smaller */
+  .chart-label{width:100px;font-size:0.68rem;}
+  .chart-val{width:44px;font-size:0.68rem;}
+
+  /* Weekly grid: smaller */
+  .weekly-grid{height:100px;}
+
+  /* Score ring smaller */
+  .score-ring{width:80px;height:80px;}
+  .score-ring svg{width:80px;height:80px;}
+  .score-ring-pct{font-size:1.1rem;}
+  #liveScoreBar{flex-direction:column;gap:14px;padding:14px;}
+  #scoreSummaryGrid{grid-template-columns:repeat(3,1fr)!important;}
+
+  /* Result banner */
+  .result-banner{flex-direction:column;text-align:center;padding:16px;}
+  .result-banner .rb-score{margin-left:0;}
+
+  /* Tables: horizontal scroll */
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{min-width:520px;}
+
+  /* Modal: full width */
+  .modal{width:96%;padding:20px 16px;border-radius:14px;}
+  .modal-grid{grid-template-columns:1fr!important;}
+
+  /* Toast: center bottom */
+  .toast{left:14px;right:14px;bottom:80px;text-align:center;justify-content:center;}
+
+  /* Print report: compact */
+  .print-report{padding:16px;}
+  .rpt-summary-grid{grid-template-columns:repeat(2,1fr)!important;}
+  .rpt-footer{grid-template-columns:1fr!important;gap:20px;}
+
+  /* Certificate: compact */
+  .cert-inner{padding:20px 16px;}
+  .cert-title{font-size:1.4rem;}
+  .cert-recipient{font-size:1.2rem;}
+  .cert-sigs{grid-template-columns:1fr!important;gap:16px;}
+
+  /* Inspection checklist cols */
+  #page-add [style*="grid-template-columns:1fr 1fr 1fr 1fr"]{
+    display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;
+  }
+
+  /* Login screen */
+  .login-card{padding:0 14px;}
+  .login-school-name{font-size:1.4rem!important;}
+
+  /* Section summary table */
+  #sectionSummaryBody tr td:nth-child(n+4){white-space:nowrap;}
+}
+
+/* ── SMALL PHONES (≤ 480px) ── */
+@media(max-width:480px){
+  .stat-row{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .stat-val{font-size:1.4rem;}
+  .bin-inputs{grid-template-columns:1fr 1fr;}
+  .section-list{grid-template-columns:1fr;}
+  .topbar-chip{display:none;}
+  .topbar{padding:0 10px;}
+  .page{padding:10px 10px 80px;}
+  .sc-head{padding:10px 12px;}
+  .sc-body{padding:12px;}
+  .btn{font-size:0.75rem;padding:8px 14px;}
+  table{min-width:480px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <!-- Logo -->
+    <div style="margin-bottom:6px;">
+      <div class="login-logo-wrap">
+        <img id="loginLogo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='58' fill='%23fff' stroke='%232e7d32' stroke-width='3'/%3E%3Ccircle cx='60' cy='60' r='50' fill='none' stroke='%232e7d32' stroke-width='1.5'/%3E%3Ctext x='60' y='30' text-anchor='middle' font-size='8' font-weight='bold' fill='%232e7d32' font-family='Arial'%3EPATUL NATIONAL%3C/text%3E%3Ctext x='60' y='40' text-anchor='middle' font-size='8' font-weight='bold' fill='%232e7d32' font-family='Arial'%3EHIGH SCHOOL%3C/text%3E%3Ctext x='60' y='78' font-size='36' text-anchor='middle'%3E📚%3C/text%3E%3Ctext x='60' y='100' text-anchor='middle' font-size='7' fill='%232e7d32' font-family='Arial'%3ETUGUEGARAO CITY%3C/text%3E%3Ctext x='60' y='110' text-anchor='middle' font-size='7' fill='%232e7d32' font-family='Arial'%3ECagayan Valley%3C/text%3E%3C/svg%3E" alt="Patul NHS Logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+        />
+        <span class="logo-fallback" style="display:none;">🏫</span>
+      </div>
+    </div>
+    <div class="login-school-name" style="font-size:1.9rem;letter-spacing:0.04em;line-height:1.15;margin-bottom:5px;">PATUL NATIONAL<br>HIGH SCHOOL</div>
+    <div class="login-system-name">🗑️ Waste Segregation Record System · DepEd Philippines</div>
+
+    <!-- Card -->
+    <div class="login-box">
+      <h2>🔐 Sign In to Continue</h2>
+
+      <div class="login-field">
+        <label>Username</label>
+        <input type="text" id="loginUser" placeholder="Enter your username" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <div class="login-field">
+        <label>Password</label>
+        <div class="login-pass-wrap">
+          <input type="password" id="loginPass" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+          <button class="login-pass-toggle" type="button" onclick="toggleLoginPass(this)" title="Show/hide password">👁</button>
+        </div>
+      </div>
+
+      <div class="login-error" id="loginError">
+        <span>⚠️</span><span id="loginErrorMsg">Invalid username or password.</span>
+      </div>
+
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">🔐 Sign In</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout" id="appLayout" style="display:none;">
+
+<!-- Mobile sidebar overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+<!-- ══ BOTTOM NAV (mobile) ══ -->
+<nav class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-items">
+    <button class="bnav-item active" id="bnav-dashboard" onclick="showPage('dashboard')">
+      <span class="bni">📊</span>Dashboard
+    </button>
+    <button class="bnav-item" id="bnav-sections" onclick="showPage('sections')">
+      <span class="bni">🏷️</span>Sections
+    </button>
+    <button class="bnav-item" id="bnav-add" onclick="showPage('add')">
+      <span class="bni">📝</span>Add
+    </button>
+    <button class="bnav-item" id="bnav-records" onclick="showPage('records')">
+      <span class="bni">📋</span>Records
+    </button>
+    <button class="bnav-item" id="bnav-inspections" onclick="showPage('inspections')">
+      <span class="bni">🔍</span>Inspect
+    </button>
+    <button class="bnav-item" id="bnav-reports" onclick="showPage('reports')">
+      <span class="bni">📈</span>Reports
+    </button>
+  </div>
+</nav>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-topbar">
+      <div class="logo-box">
+        <img id="sidebarLogo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='58' fill='%23fff' stroke='%232e7d32' stroke-width='3'/%3E%3Ccircle cx='60' cy='60' r='50' fill='none' stroke='%232e7d32' stroke-width='1.5'/%3E%3Ctext x='60' y='30' text-anchor='middle' font-size='8' font-weight='bold' fill='%232e7d32' font-family='Arial'%3EPATUL NATIONAL%3C/text%3E%3Ctext x='60' y='40' text-anchor='middle' font-size='8' font-weight='bold' fill='%232e7d32' font-family='Arial'%3EHIGH SCHOOL%3C/text%3E%3Ctext x='60' y='78' font-size='36' text-anchor='middle'%3E%F0%9F%93%9A%3C/text%3E%3Ctext x='60' y='100' text-anchor='middle' font-size='7' fill='%232e7d32' font-family='Arial'%3ETUGUEGARAO CITY%3C/text%3E%3Ctext x='60' y='110' text-anchor='middle' font-size='7' fill='%232e7d32' font-family='Arial'%3ECagayan Valley%3C/text%3E%3C/svg%3E" alt="logo"/>
+      </div>
+      <div class="school-info">
+        <h2>Patul National High School</h2>
+        <p>♻️ Waste Segregation · DepEd PH</p>
+      </div>
+    </div>
+  </div>
+  <div class="nav-group">Menu</div>
+  <div class="nav-item active" onclick="showPage('dashboard')"><span class="ni">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="showPage('sections')"><span class="ni">🏷️</span> Sections</div>
+  <div class="nav-item" onclick="showPage('add')"><span class="ni">📝</span> Add Record</div>
+  <div class="nav-item" onclick="showPage('records')"><span class="ni">📋</span> All Records</div>
+  <div class="nav-item" onclick="showPage('inspections')"><span class="ni">🔍</span> Inspection Logs</div>
+  <div class="nav-item" onclick="showPage('reports')"><span class="ni">📈</span> Reports</div>
+  <div class="nav-group">Others</div>
+  <div class="nav-item no-print" onclick="window.print()"><span class="ni">🖨️</span> Print</div>
+  <div class="sidebar-footer">RA 9003 – Ecological Solid<br>Waste Management Act<br>DepEd Order No. 13, s. 2017</div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
+    <button class="mob-menu-btn" onclick="toggleMobileSidebar()" aria-label="Menu">☰</button>
+    <div class="topbar-title"><span id="pageTitle">📊 Dashboard</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px;flex-shrink:0;">
+    <div class="date-badge" id="todayDate" style="flex-shrink:0;white-space:nowrap;"></div>
+    <div id="userBadge" class="topbar-chip green" style="flex-shrink:0;"></div>
+    <button onclick="doLogout()" class="topbar-chip yellow" style="background:rgba(198,40,40,0.15);color:#ef5350;border-color:rgba(198,40,40,0.35);cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0;">🚪 Logout</button>
+  </div>
+</div>
+
+<!-- ════ DASHBOARD ════ -->
+<div class="page active" id="page-dashboard">
+  <div class="stat-row" id="statRow"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div class="sc">
+      <div class="sc-head"><h3>📅 Weekly Waste (kg)</h3><span style="font-size:0.7rem;color:var(--sub);font-weight:600;" id="weekLabel"></span></div>
+      <div class="sc-body">
+        <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;font-size:0.68rem;font-weight:700;">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--green-l);margin-right:3px;"></span>Bio</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--blue-l);margin-right:3px;"></span>Non-Bio</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--yellow-l);margin-right:3px;"></span>Recycle</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--red-l);margin-right:3px;"></span>Hazardous</span>
+        </div>
+        <div class="weekly-grid" id="weeklyChart"></div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:4px;">
+          <div style="text-align:center;font-size:0.6rem;font-weight:800;color:var(--sub);">Lun</div><div style="text-align:center;font-size:0.6rem;font-weight:800;color:var(--sub);">Mar</div><div style="text-align:center;font-size:0.6rem;font-weight:800;color:var(--sub);">Miy</div><div style="text-align:center;font-size:0.6rem;font-weight:800;color:var(--sub);">Huw</div><div style="text-align:center;font-size:0.6rem;font-weight:800;color:var(--sub);">Biy</div><div style="text-align:center;font-size:0.6rem;font-weight:800;color:var(--sub);">Sab</div><div style="text-align:center;font-size:0.6rem;font-weight:800;color:var(--sub);">Lin</div>
+        </div>
+      </div>
+    </div>
+    <div class="sc">
+      <div class="sc-head"><h3>🗑️ Total per Bin (kg)</h3></div>
+      <div class="sc-body"><div id="binChart"></div></div>
+    </div>
+  </div>
+  <div class="sc" style="margin-top:20px;">
+    <div class="sc-head"><h3>🕐 Latest Records</h3><button class="btn btn-outline btn-sm no-print" onclick="showPage('records')">View All →</button></div>
+    <div class="sc-body" style="padding:0;"><div class="tw"><table><thead><tr><th>Date</th><th>Grade</th><th>Section</th><th>Adviser</th><th>🟢 Bio</th><th>🔵 Non-Bio</th><th>🟡 Recycle</th><th>🔴 Hazardous</th><th>Total</th></tr></thead><tbody id="recentBody"></tbody></table></div></div>
+  </div>
+</div>
+
+<!-- ════ SECTIONS ════ -->
+<div class="page" id="page-sections">
+  <div class="sc" style="margin-bottom:20px;">
+    <div class="sc-head">
+      <h3>🏷️ List of Sections</h3>
+      <div style="display:flex;align-items:center;gap:8px;" class="no-print">
+        <button class="btn btn-danger btn-sm" id="btnDeleteSelSec" style="display:none;" onclick="deleteSelectedSections()">🗑️ I-delete Selected (<span id="selSecCount">0</span>)</button>
+        <button class="btn btn-outline btn-sm" onclick="clearAllSections()" style="color:var(--red);border-color:var(--red-l);">🧹 Clear All Sections</button>
+        <button class="btn btn-purple btn-sm no-print" onclick="openSectionModal()">+ Add Section</button>
+      </div>
+    </div>
+    <div class="sc-body">
+      <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;" class="no-print">
+        <input type="text" id="secSearch" placeholder="🔍 Hanapin ang section..." oninput="renderSections()" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;font-family:'Nunito',sans-serif;font-size:0.83rem;outline:none;flex:1;min-width:160px;">
+        <select id="secGradeFilter" onchange="renderSections()" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;font-family:'Nunito',sans-serif;font-size:0.83rem;outline:none;">
+          <option value="">All Grades</option>
+          <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+        </select>
+      </div>
+      <div class="section-list" id="sectionList"></div>
+      <div id="emptySections" class="empty" style="display:none;"><div class="ei">🏷️</div><p>Wala pang section. Magdagdag na!</p></div>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="sc-head"><h3>📊 Section Summary</h3></div>
+    <div class="sc-body" style="padding:0;">
+      <div class="tw"><table><thead><tr><th>Grade</th><th>Section</th><th>Adviser</th><th>🟢 Bio</th><th>🔵 Non-Bio</th><th>🟡 Recycle</th><th>🔴 Hazardous</th><th>Total</th><th>Inspections</th></tr></thead><tbody id="sectionSummaryBody"></tbody></table></div>
+      <div id="emptySectionSummary" class="empty" style="display:none;"><div class="ei">📊</div><p>Walang datos pa.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MAG-RECORD ════ -->
+<div class="page" id="page-add">
+
+  <!-- TAB BAR -->
+  <div class="tab-bar no-print">
+    <button class="tab-btn active" id="tab-waste-btn" onclick="switchTab('waste')">⚖️ Waste Record</button>
+    <button class="tab-btn" id="tab-inspect-btn" onclick="switchTab('inspect')">🔍 Inspection Checklist</button>
+  </div>
+
+  <!-- TAB: WASTE RECORD -->
+  <div class="tab-content active" id="tab-waste">
+    <div class="sc">
+      <div class="sc-head"><h3>⚖️ Record Waste Amount</h3></div>
+      <div class="sc-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
+          <div class="fg"><label>📅 Date *</label><input type="date" id="f_date"></div>
+          <div class="fg"><label>🎓 Grade Level *</label><select id="f_grade" onchange="onGradeChange('f')"><option value="">— Select Grade —</option></select></div>
+          <div class="fg"><label>🏷️ Section *</label><select id="f_section" onchange="onSectionChange('f')" disabled><option value="">— Select Section —</option></select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px;">
+          <div class="fg">
+            <label>👩‍🏫 Adviser</label>
+            <input type="text" id="f_teacher" readonly style="background:#f0f9f0;border-color:var(--green-l);color:var(--green);font-weight:700;" placeholder="Awtomatiko mula sa section data">
+            <div class="autofill-hint" id="f_adviserHint">✅ Auto-filled from section data</div>
+          </div>
+          <div class="fg"><label>📝 Notes (opsyonal)</label><input type="text" id="f_notes" placeholder="e.g. Regular collection, cleanup drive..."></div>
+        </div>
+        <div id="f_sectionInfoBar" style="display:none;background:var(--teal-bg);border-radius:12px;padding:10px 16px;margin:12px 0;font-size:0.78rem;font-weight:700;color:var(--teal);display:none;align-items:center;gap:8px;">
+          <span>ℹ️</span><span id="f_sectionInfoText"></span>
+        </div>
+        <div style="margin:16px 0 8px;font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--sub);">Waste Amount (kilograms)</div>
+        <div class="bin-inputs">
+          <div class="bic green"><div class="bi">🟢</div><div class="bn">Biodegradable</div><input type="number" id="f_green" min="0" step="0.1" placeholder="0.0"><div class="bu">kilogram</div></div>
+          <div class="bic blue"><div class="bi">🔵</div><div class="bn">Non-Biodegradable</div><input type="number" id="f_blue" min="0" step="0.1" placeholder="0.0"><div class="bu">kilogram</div></div>
+          <div class="bic yellow"><div class="bi">🟡</div><div class="bn">Recyclable</div><input type="number" id="f_yellow" min="0" step="0.1" placeholder="0.0"><div class="bu">kilogram</div></div>
+          <div class="bic red"><div class="bi">🔴</div><div class="bn">Hazardous</div><input type="number" id="f_red" min="0" step="0.1" placeholder="0.0"><div class="bu">kilogram</div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px;" class="no-print">
+          <button class="btn btn-primary" onclick="saveRecord()">💾 Save Record</button>
+          <button class="btn btn-outline" onclick="clearForm()">🗑️ I-clear</button>
+        </div>
+      </div>
+    </div>
+    <div class="sc" id="addSummary" style="display:none;">
+      <div class="sc-head"><h3>✅ Record Saved!</h3></div>
+      <div class="sc-body" id="addSummaryBody"></div>
+    </div>
+  </div>
+
+  <!-- TAB: INSPECTION CHECKLIST -->
+  <div class="tab-content" id="tab-inspect">
+    <div class="sc">
+      <div class="sc-head"><h3>🔍 Inspection Checklist</h3><span style="font-size:0.73rem;color:var(--sub);font-weight:600;">I-check ang bawat aytem. ✅ Compliant | ❌ Non-Compliant</span></div>
+      <div class="sc-body">
+
+        <!-- Section selector -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px;padding-bottom:20px;border-bottom:2px solid var(--border);">
+          <div class="fg"><label>📅 Date *</label><input type="date" id="i_date"></div>
+          <div class="fg"><label>🎓 Grade Level *</label><select id="i_grade" onchange="onGradeChange('i')"><option value="">— Select Grade —</option></select></div>
+          <div class="fg"><label>🏷️ Section *</label><select id="i_section" onchange="onSectionChange('i')" disabled><option value="">— Select Section —</option></select></div>
+          <div class="fg"><label>👩‍🏫 Inspector</label><input type="text" id="i_inspector" placeholder="Teacher's name"></div>
+        </div>
+
+        <div id="i_adviserRow" style="display:none;background:var(--teal-bg);border-radius:12px;padding:10px 16px;margin-bottom:18px;font-size:0.78rem;font-weight:700;color:var(--teal);align-items:center;gap:8px;">
+          <span>🏷️</span><span id="i_sectionInfoText">Select a section.</span>
+        </div>
+
+        <!-- Live Score Header -->
+        <div style="display:flex;align-items:center;gap:24px;background:var(--bg);border-radius:16px;padding:16px 20px;margin-bottom:24px;border:1.5px solid var(--border);" id="liveScoreBar">
+          <div class="score-ring-wrap">
+            <div class="score-ring">
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle class="score-ring-bg" cx="55" cy="55" r="46"/>
+                <circle class="score-ring-fill" id="ringFill" cx="55" cy="55" r="46" stroke-dasharray="289" stroke-dashoffset="289" stroke="#66bb6a"/>
+              </svg>
+              <div class="score-ring-text">
+                <div class="score-ring-pct" id="ringPct" style="color:var(--green)">—</div>
+                <div class="score-ring-label">Score</div>
+              </div>
+            </div>
+            <span class="score-ring-tag" id="ringTag" style="background:var(--bg);color:var(--sub);">Pending</span>
+          </div>
+          <div style="flex:1;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;" id="scoreSummaryGrid">
+              <div style="text-align:center;padding:10px;background:var(--green-bg);border-radius:10px;">
+                <div style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:var(--green);" id="passCount">0</div>
+                <div style="font-size:0.65rem;font-weight:700;color:var(--sub);">✅ PASS</div>
+              </div>
+              <div style="text-align:center;padding:10px;background:var(--red-bg);border-radius:10px;">
+                <div style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:var(--red);" id="failCount">0</div>
+                <div style="font-size:0.65rem;font-weight:700;color:var(--sub);">❌ FAIL</div>
+              </div>
+              <div style="text-align:center;padding:10px;background:var(--bg);border-radius:10px;border:1.5px solid var(--border);">
+                <div style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:var(--sub);" id="naCount">0</div>
+                <div style="font-size:0.65rem;font-weight:700;color:var(--sub);">— N/A</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHECKLIST GROUPS -->
+        <div id="checklistBody"></div>
+
+        <!-- Overall Remarks -->
+        <div class="fg" style="margin-top:20px;">
+          <label>📝 General Remarks / Inspector Notes</label>
+          <textarea id="i_remarks" rows="3" placeholder="Enter observations, recommendations, or other notes..."></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;" class="no-print">
+          <button class="btn btn-teal" onclick="saveInspection()">💾 Save Inspection</button>
+          <button class="btn btn-primary" onclick="sendInspectionEmail()" id="btnSendEmail" style="display:none;">📧 Send Email to Adviser</button>
+          <button class="btn btn-outline" onclick="resetChecklist()">🔄 I-reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result after save -->
+    <div id="inspectResult" style="display:none;">
+      <div id="resultBanner" class="result-banner compliant">
+        <div class="rb-icon" id="resultIcon">✅</div>
+        <div>
+          <div class="rb-title" id="resultTitle">Compliant</div>
+          <div class="rb-sub" id="resultSub"></div>
+        </div>
+        <div style="margin-left:auto;text-align:right;">
+          <div class="rb-score" id="resultScore">100%</div>
+          <div class="rb-score-label">Compliance Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ ALL RECORDS ════ -->
+<div class="page" id="page-records">
+  <div class="sc" style="margin-bottom:16px;">
+    <div class="sc-body" style="padding:14px 20px;">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="searchInput" placeholder="🔍 Hanapin..." oninput="renderRecords()" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;font-family:'Nunito',sans-serif;font-size:0.84rem;outline:none;flex:1;min-width:180px;">
+        <select id="filterGrade" onchange="renderRecords()" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;font-family:'Nunito',sans-serif;font-size:0.84rem;outline:none;"><option value="">All Grades</option></select>
+        <select id="filterMonth" onchange="renderRecords()" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;font-family:'Nunito',sans-serif;font-size:0.84rem;outline:none;"><option value="">All Months</option></select>
+        <button class="btn btn-primary btn-sm no-print" onclick="exportCSV()">⬇️ Export CSV</button>
+      </div>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="sc-head">
+      <h3>📋 All Records</h3>
+      <div style="display:flex;align-items:center;gap:8px;" class="no-print">
+        <span style="font-size:0.76rem;color:var(--sub);font-weight:600;" id="recordCount"></span>
+        <button class="btn btn-danger btn-sm" id="btnDeleteSelRec" style="display:none;" onclick="deleteSelectedRecords()">🗑️ I-delete Selected (<span id="selRecCount">0</span>)</button>
+        <button class="btn btn-outline btn-sm" onclick="clearAllRecords()" style="color:var(--red);border-color:var(--red-l);">🧹 Clear All Records</button>
+      </div>
+    </div>
+    <div class="sc-body" style="padding:0;">
+      <div class="tw"><table><thead><tr><th class="no-print"><input type="checkbox" id="chkAllRec" onclick="toggleAllRecords(this)" title="Select All"/></th><th>Date</th><th>Grade</th><th>Section</th><th>Adviser</th><th>🟢 Bio</th><th>🔵 Non-Bio</th><th>🟡 Recycle</th><th>🔴 Hazardous</th><th>Total</th><th class="no-print">Action</th></tr></thead><tbody id="recordsBody"></tbody></table></div>
+      <div id="emptyRecords" class="empty" style="display:none;"><div class="ei">📭</div><p>Walang records. Add Record na!</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ INSPECTION LOGS ════ -->
+<div class="page" id="page-inspections">
+  <div class="sc" style="margin-bottom:16px;">
+    <div class="sc-body" style="padding:14px 20px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input type="text" id="inspSearch" placeholder="🔍 Hanapin (section, inspector...)" oninput="renderInspectionLogs()" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;font-family:'Nunito',sans-serif;font-size:0.84rem;outline:none;flex:1;min-width:180px;">
+        <select id="inspGradeFilter" onchange="renderInspectionLogs()" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;font-family:'Nunito',sans-serif;font-size:0.84rem;outline:none;"><option value="">All Grades</option></select>
+        <select id="inspResultFilter" onchange="renderInspectionLogs()" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;font-family:'Nunito',sans-serif;font-size:0.84rem;outline:none;">
+          <option value="">All Results</option>
+          <option value="Compliant">✅ Compliant</option>
+          <option value="Needs Improvement">⚠️ Needs Improvement</option>
+          <option value="Non-Compliant">❌ Non-Compliant</option>
+        </select>
+        <button class="btn btn-primary btn-sm no-print" onclick="exportInspCSV()">⬇️ Export CSV</button>
+      </div>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="sc-head">
+      <h3>🔍 Inspection Logs</h3>
+      <div style="display:flex;align-items:center;gap:8px;" class="no-print">
+        <span id="inspCount" style="font-size:0.76rem;color:var(--sub);font-weight:600;"></span>
+        <button class="btn btn-danger btn-sm" id="btnDeleteSelInsp" style="display:none;" onclick="deleteSelectedInsp()">🗑️ I-delete Selected (<span id="selInspCount">0</span>)</button>
+        <button class="btn btn-outline btn-sm" onclick="clearAllInsp()" style="color:var(--red);border-color:var(--red-l);">🧹 Clear All Logs</button>
+      </div>
+    </div>
+    <div class="sc-body" style="padding:0;">
+      <div class="tw"><table><thead><tr><th class="no-print"><input type="checkbox" id="chkAllInsp" onclick="toggleAllInsp(this)" title="Select All"/></th><th>Date</th><th>Grade</th><th>Section</th><th>Inspector</th><th>Score</th><th>Pass</th><th>Fail</th><th>Result</th><th class="no-print">Action</th></tr></thead><tbody id="inspBody"></tbody></table></div>
+      <div id="emptyInsp" class="empty" style="display:none;"><div class="ei">🔍</div><p>Walang inspection logs pa.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ REPORTS ════ -->
+<div class="page" id="page-reports">
+
+  <!-- Report Tabs -->
+  <div class="tab-bar no-print" style="margin-bottom:20px;">
+    <button class="tab-btn active" id="rtab-analytics" onclick="switchReportTab('analytics')">📊 Analytics</button>
+    <button class="tab-btn" id="rtab-print" onclick="switchReportTab('print')">🖨️ Print Reports</button>
+    <button class="tab-btn" id="rtab-cert" onclick="switchReportTab('cert')">🏆 Certificates</button>
+  </div>
+
+  <!-- ── ANALYTICS TAB ── -->
+  <div id="rtab-content-analytics">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+      <div class="sc"><div class="sc-head"><h3>📊 Monthly Waste</h3></div><div class="sc-body"><div id="monthlyChart"></div></div></div>
+      <div class="sc"><div class="sc-head"><h3>🏆 Top Sections (Waste Volume)</h3></div><div class="sc-body"><div id="topSections"></div></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+      <div class="sc"><div class="sc-head"><h3>🔍 Compliance Rate per Section</h3></div><div class="sc-body"><div id="complianceChart"></div></div></div>
+      <div class="sc"><div class="sc-head"><h3>❌ Most Failed Items</h3></div><div class="sc-body"><div id="failItems"></div></div></div>
+    </div>
+    <div class="sc"><div class="sc-head"><h3>📋 Summary</h3></div><div class="sc-body"><div id="summaryStats"></div></div></div>
+  </div>
+
+  <!-- ── PRINT REPORTS TAB ── -->
+  <div id="rtab-content-print" style="display:none;">
+    <div class="sc no-print" style="margin-bottom:20px;">
+      <div class="sc-head"><h3>🖨️ Generate Print Report</h3></div>
+      <div class="sc-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;">
+          <div class="fg"><label>📅 Report Type</label>
+            <select id="rpt_type" onchange="updateReportDateInputs()">
+              <option value="daily">📅 Daily</option>
+              <option value="weekly">📆 Weekly</option>
+              <option value="monthly" selected>🗓️ Monthly</option>
+              <option value="yearly">📅 Yearly</option>
+            </select>
+          </div>
+          <div class="fg" id="rpt_date_wrap"><label>📅 Date</label><input type="date" id="rpt_date"></div>
+          <div class="fg" id="rpt_week_wrap" style="display:none;"><label>📆 Week Starting</label><input type="date" id="rpt_week"></div>
+          <div class="fg" id="rpt_month_wrap"><label>🗓️ Month</label><input type="month" id="rpt_month"></div>
+          <div class="fg" id="rpt_year_wrap" style="display:none;"><label>📅 Year</label><input type="number" id="rpt_year" min="2020" max="2099" placeholder="2025"></div>
+          <div class="fg"><label>🎓 Grade Level</label>
+            <select id="rpt_grade"><option value="">All Grades</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option></select>
+          </div>
+          <div class="fg"><label>🏷️ Section</label>
+            <select id="rpt_section"><option value="">All Sections</option></select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="generatePrintReport()">👁️ Preview Report</button>
+          <button class="btn btn-teal" onclick="printReport()">🖨️ Print / Save PDF</button>
+        </div>
+      </div>
+    </div>
+    <!-- Print Preview Area -->
+    <div id="printReportPreview"></div>
+  </div>
+
+  <!-- ── CERTIFICATES TAB ── -->
+  <div id="rtab-content-cert" style="display:none;">
+    <div class="sc no-print" style="margin-bottom:20px;">
+      <div class="sc-head"><h3>🏆 Certificate Generator</h3></div>
+      <div class="sc-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;">
+          <div class="fg"><label>🏆 Certificate Type</label>
+            <select id="cert_type" onchange="updateCertFields()">
+              <option value="recognition">🥇 Certificate of Recognition</option>
+              <option value="compliance">✅ Certificate of Compliance</option>
+              <option value="excellence">⭐ Certificate of Excellence</option>
+              <option value="participation">🤝 Certificate of Participation</option>
+              <option value="topwaste">♻️ Top Waste Segregator</option>
+            </select>
+          </div>
+          <div class="fg"><label>👤 Recipient Name *</label><input type="text" id="cert_recipient" placeholder="e.g. Grade 7 - Narra"></div>
+          <div class="fg"><label>🎓 Grade & Section</label><input type="text" id="cert_section" placeholder="e.g. Grade 7 - Narra"></div>
+          <div class="fg"><label>👩‍🏫 Adviser</label><input type="text" id="cert_adviser" placeholder="e.g. Ms. Maria Santos"></div>
+          <div class="fg"><label>📅 Date Awarded</label><input type="date" id="cert_date"></div>
+          <div class="fg"><label>🗓️ Period Covered</label><input type="text" id="cert_period" placeholder="e.g. S.Y. 2025-2026, 1st Quarter"></div>
+          <div class="fg"><label>✍️ Awarded By</label><input type="text" id="cert_awardedby" placeholder="e.g. Principal's Name"></div>
+          <div class="fg"><label>📝 Custom Note (opsyonal)</label><input type="text" id="cert_note" placeholder="Additional note or reason..."></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="previewCert()">👁️ Preview Certificate</button>
+          <button class="btn btn-teal" onclick="printCert()">🖨️ Print Certificate</button>
+        </div>
+      </div>
+    </div>
+    <div id="certPreview"></div>
+  </div>
+
+</div>
+
+</div>
+
+<!-- ════ USER MANAGEMENT ════ -->
+<div class="page" id="page-usermgmt">
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+
+    <!-- ── Add / Edit User Form ── -->
+    <div class="sc">
+      <div class="sc-head"><h3 id="umFormTitle">➕ Add New User</h3></div>
+      <div class="sc-body" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="fg">
+          <label>Username</label>
+          <input id="umUsername" type="text" placeholder="e.g. juan.delacruz"/>
+        </div>
+        <div class="fg">
+          <label>Password</label>
+          <div class="login-pass-wrap" style="position:relative;">
+            <input id="umPassword" type="password" placeholder="Min. 4 characters" style="border:1.5px solid var(--border);border-radius:10px;padding:9px 40px 9px 12px;font-family:'Nunito',sans-serif;font-size:0.85rem;color:var(--text);background:var(--bg);outline:none;width:100%;"/>
+            <button class="login-pass-toggle" type="button" onclick="toggleUmPass(this)" style="right:11px;top:50%;transform:translateY(-50%);">👁</button>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Role</label>
+          <select id="umRole" onchange="autoFillUmLabel()">
+            <option value="Administrator">👑 Administrator</option>
+            <option value="Teacher" selected>👩‍🏫 Teacher</option>
+            <option value="Viewer">👁️ Viewer</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Display Label</label>
+          <input id="umLabel" type="text" placeholder="e.g. 👩‍🏫 Ms. Santos"/>
+        </div>
+        <div id="umInlineError" style="display:none;padding:9px 13px;background:var(--red-bg);border:1px solid #ef9a9a;border-radius:8px;color:var(--red);font-size:0.8rem;font-weight:700;"></div>
+        <input type="hidden" id="umEditIndex" value="-1"/>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="saveUser()" style="flex:1;justify-content:center;">💾 Save User</button>
+          <button class="btn btn-outline" id="umCancelBtn" onclick="resetUmForm()" style="display:none;">✕ Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Role Permissions Info ── -->
+    <div class="sc">
+      <div class="sc-head"><h3>🔐 Role Permissions</h3></div>
+      <div class="sc-body" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="border-radius:12px;padding:14px;background:rgba(198,40,40,0.06);border:1.5px solid rgba(198,40,40,0.18);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="font-size:1.1rem;">👑</span>
+            <span style="font-weight:800;color:var(--red);font-size:0.88rem;">Administrator</span>
+            <span class="badge badge-red" style="font-size:0.6rem;margin-left:auto;">Full Access</span>
+          </div>
+          <div style="font-size:0.75rem;color:var(--sub);line-height:1.7;font-weight:600;">
+            ✅ Add / Edit / Delete Records<br>
+            ✅ Manage Sections<br>
+            ✅ Conduct Inspections<br>
+            ✅ Generate Reports & Certificates<br>
+            ✅ Manage Users
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:14px;background:rgba(46,125,50,0.06);border:1.5px solid rgba(46,125,50,0.18);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="font-size:1.1rem;">👩‍🏫</span>
+            <span style="font-weight:800;color:var(--green);font-size:0.88rem;">Teacher</span>
+            <span class="badge badge-green" style="font-size:0.6rem;margin-left:auto;">Standard Access</span>
+          </div>
+          <div style="font-size:0.75rem;color:var(--sub);line-height:1.7;font-weight:600;">
+            ✅ Add / Edit Records<br>
+            ✅ View Sections & Inspections<br>
+            ✅ View Reports<br>
+            ❌ Cannot manage users<br>
+            ❌ Cannot delete records
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:14px;background:rgba(21,101,192,0.06);border:1.5px solid rgba(21,101,192,0.18);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="font-size:1.1rem;">👁️</span>
+            <span style="font-weight:800;color:var(--blue);font-size:0.88rem;">Viewer</span>
+            <span class="badge badge-blue" style="font-size:0.6rem;margin-left:auto;">Read Only</span>
+          </div>
+          <div style="font-size:0.75rem;color:var(--sub);line-height:1.7;font-weight:600;">
+            ✅ View Dashboard & Records<br>
+            ✅ View Inspection Logs<br>
+            ✅ View Reports<br>
+            ❌ Cannot add or edit anything<br>
+            ❌ Cannot manage users
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── User Accounts Table ── -->
+  <div class="sc">
+    <div class="sc-head">
+      <h3>👥 User Accounts</h3>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="userCountBadge" style="font-size:0.76rem;color:var(--sub);font-weight:600;"></span>
+      </div>
+    </div>
+    <div class="sc-body" style="padding:0;">
+      <div class="tw">
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Username</th>
+              <th>Display Label</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+      <div id="emptyUsers" class="empty" style="display:none;padding:32px;text-align:center;">
+        <div class="ei">👥</div><p>Walang users. Magdagdag na!</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════ REPORT SETTINGS ════ -->
+<div class="page" id="page-reportsettings">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div style="font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:var(--text);">⚙️ Report Settings</div>
+    <button class="btn btn-danger" onclick="saveReportSettings()" style="background:linear-gradient(135deg,#c62828,#e53935);box-shadow:0 3px 12px rgba(198,40,40,0.3);">💾 Save Settings</button>
+  </div>
+
+  <!-- Row 1: School Info + Logos/Year/Quarter side by side -->
+  <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:16px;margin-bottom:16px;">
+
+    <!-- School Information -->
+    <div class="sc">
+      <div class="sc-head" style="padding:12px 16px;"><h3 style="font-size:0.9rem;">🏫 School Information</h3></div>
+      <div class="sc-body" style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="fg" style="grid-column:1/-1;"><label>SCHOOL NAME</label><input id="rs_schoolName" type="text" placeholder="e.g. Patul National High School"/></div>
+        <div class="fg" style="grid-column:1/-1;"><label>ADDRESS</label><input id="rs_address" type="text" placeholder="e.g. Brgy. Maligaya, Cabanatuan City"/></div>
+        <div class="fg"><label>CONTACT NUMBER</label><input id="rs_contact" type="text" placeholder="e.g. (044) 123-4567"/></div>
+        <div class="fg"><label>EMAIL</label><input id="rs_email" type="email" placeholder="e.g. school@deped.gov.ph"/></div>
+        <div class="fg" style="grid-column:1/-1;"><label>WEBSITE</label><input id="rs_website" type="text" placeholder="e.g. www.schoolname.edu.ph"/></div>
+      </div>
+    </div>
+
+    <!-- Logos + School Year + Quarter -->
+    <div class="sc">
+      <div class="sc-head" style="padding:12px 16px;"><h3 style="font-size:0.9rem;">🖼️ Report Header Logos</h3></div>
+      <div class="sc-body" style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+
+        <!-- Logos row -->
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-radius:10px;border:1.5px solid var(--border);">
+          <img id="rs_logoPreview" style="width:36px;height:36px;object-fit:contain;border-radius:6px;border:1.5px solid var(--border);background:#fff;" alt="School Logo"/>
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40'%3E%3Crect width='120' height='40' rx='6' fill='%23cc0001'/%3E%3Ctext x='60' y='26' text-anchor='middle' font-size='13' font-weight='bold' fill='white' font-family='Arial'%3EDepEd%3C/text%3E%3C/svg%3E" style="width:36px;height:36px;object-fit:contain;border-radius:6px;border:1.5px solid var(--border);background:#fff;" alt="DepEd Logo"/>
+          <div style="font-size:0.68rem;color:var(--sub);font-weight:600;">Current logos for printed reports</div>
+        </div>
+        <div style="padding:6px 10px;background:rgba(245,127,23,0.08);border:1px solid rgba(245,127,23,0.25);border-radius:8px;font-size:0.65rem;color:var(--yellow);font-weight:700;">
+          🔒 Logos are locked and cannot be changed after publishing.
+        </div>
+
+        <!-- School Year — horizontal scroll row -->
+        <div>
+          <div style="font-size:0.63rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--sub);margin-bottom:5px;">SCHOOL YEAR</div>
+          <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:5px;scrollbar-width:none;" id="rs_syBtns">
+            <button class="rs-chip" style="flex-shrink:0;font-size:0.65rem;padding:4px 10px;" onclick="selectSY('2023-2024')">2023-2024</button>
+            <button class="rs-chip" style="flex-shrink:0;font-size:0.65rem;padding:4px 10px;" onclick="selectSY('2024-2025')">2024-2025</button>
+            <button class="rs-chip rs-chip-active" style="flex-shrink:0;font-size:0.65rem;padding:4px 10px;" onclick="selectSY('2025-2026')">2025-2026</button>
+            <button class="rs-chip" style="flex-shrink:0;font-size:0.65rem;padding:4px 10px;" onclick="selectSY('2026-2027')">2026-2027</button>
+            <button class="rs-chip" style="flex-shrink:0;font-size:0.65rem;padding:4px 10px;" onclick="selectSY('2027-2028')">2027-2028</button>
+          </div>
+          <input id="rs_schoolYear" type="text" value="2025-2026" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-family:'Nunito',sans-serif;font-size:0.8rem;color:var(--text);background:var(--bg);outline:none;width:100%;font-weight:700;"/>
+        </div>
+
+        <!-- Quarter — 2x2 grid -->
+        <div>
+          <div style="font-size:0.63rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--sub);margin-bottom:5px;">QUARTER</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px;" id="rs_semBtns">
+            <button class="rs-chip rs-chip-active" style="font-size:0.65rem;padding:4px 8px;text-align:center;" onclick="selectSem('1st Quarter')">1st Quarter</button>
+            <button class="rs-chip" style="font-size:0.65rem;padding:4px 8px;text-align:center;" onclick="selectSem('2nd Quarter')">2nd Quarter</button>
+            <button class="rs-chip" style="font-size:0.65rem;padding:4px 8px;text-align:center;" onclick="selectSem('3rd Quarter')">3rd Quarter</button>
+            <button class="rs-chip" style="font-size:0.65rem;padding:4px 8px;text-align:center;" onclick="selectSem('4th Quarter')">4th Quarter</button>
+          </div>
+          <input id="rs_semester" type="text" value="1st Quarter" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-family:'Nunito',sans-serif;font-size:0.8rem;color:var(--text);background:var(--bg);outline:none;width:100%;font-weight:700;"/>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Signatories -->
+  <div class="sc" style="margin-bottom:16px;">
+    <div class="sc-head" style="padding:12px 16px;">
+      <h3 style="font-size:0.9rem;">✍️ Signatories</h3>
+      <button class="btn btn-primary btn-sm" onclick="openAddSignatory()">+ Add</button>
+    </div>
+    <div class="sc-body" style="padding:0;">
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>ORDER</th><th>TITLE</th><th>NAME</th><th>POSITION</th><th>ACTIONS</th></tr>
+          </thead>
+          <tbody id="signatoryBody"></tbody>
+        </table>
+      </div>
+      <div id="emptySig" style="display:none;text-align:center;padding:24px;color:var(--sub);font-size:0.82rem;font-weight:600;">No signatories added yet.</div>
+    </div>
+  </div>
+
+  <!-- Signatory inline form -->
+  <div class="sc" id="sigForm" style="display:none;max-width:600px;">
+    <div class="sc-head" style="padding:12px 16px;"><h3 id="sigFormTitle" style="font-size:0.9rem;">➕ Add Signatory</h3></div>
+    <div class="sc-body" style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;">
+      <div class="fg"><label>TITLE</label><input id="sig_title" type="text" placeholder="e.g. Prepared by:"/></div>
+      <div class="fg"><label>NAME</label><input id="sig_name" type="text" placeholder="e.g. Maria T. Santos"/></div>
+      <div class="fg"><label>POSITION</label><input id="sig_position" type="text" placeholder="e.g. Registrar"/></div>
+      <input type="hidden" id="sig_editIdx" value="-1"/>
+      <div style="display:flex;gap:6px;padding-bottom:1px;">
+        <button class="btn btn-primary btn-sm" onclick="saveSignatory()">💾</button>
+        <button class="btn btn-outline btn-sm" onclick="closeSigForm()">✕</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /main -->
+</div><!-- /appLayout -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+
+<!-- SECTION MODAL -->
+<div class="overlay" id="sectionModal">
+  <div class="modal">
+    <h3 id="sectionModalTitle">🏷️ New Section</h3>
+    <div class="modal-form">
+      <div class="modal-grid">
+        <div class="fg"><label>🎓 Grade Level *</label><select id="sm_grade"><option value="">— Select —</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option></select></div>
+        <div class="fg"><label>🏷️ Section Name *</label><input type="text" id="sm_name" placeholder="e.g. Narra, Sampaguita..."></div>
+      </div>
+      <div class="fg"><label>👩‍🏫 Adviser Name *</label><input type="text" id="sm_adviser" placeholder="e.g. Ms. Maria Santos"></div>
+      <div class="fg"><label>📧 Adviser Email <span style="opacity:0.55;font-weight:600;">(para sa email notification)</span></label><input type="email" id="sm_email" placeholder="e.g. maria.santos@deped.gov.ph"></div>
+      <div class="fg"><label>📝 Remarks (opsyonal)</label><input type="text" id="sm_remarks" placeholder="e.g. Regular class, Science class..."></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('sectionModal')">Kanselahin</button>
+      <button class="btn btn-purple" onclick="saveSection()">💾 I-save</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW INSPECTION MODAL -->
+<div class="overlay" id="viewInspModal">
+  <div class="modal" style="max-width:680px;">
+    <h3>🔍 Inspection Details</h3>
+    <div id="viewInspBody"></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('viewInspModal')">Isara</button></div>
+  </div>
+</div>
+
+<!-- DELETE MODALS -->
+<div class="overlay" id="deleteModal">
+  <div class="modal">
+    <h3>🗑️ Delete Record?</h3>
+    <p style="font-size:0.84rem;color:var(--sub);">Hindi na mababawi ito.</p>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('deleteModal')">Kanselahin</button><button class="btn btn-danger" onclick="confirmDelete()">I-delete</button></div>
+  </div>
+</div>
+<div class="overlay" id="deleteSectionModal">
+  <div class="modal">
+    <h3>🗑️ Delete Section?</h3>
+    <p style="font-size:0.84rem;color:var(--sub);">Mananatili ang mga records ng section na ito.</p>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('deleteSectionModal')">Kanselahin</button><button class="btn btn-danger" onclick="confirmDeleteSection()">I-delete</button></div>
+  </div>
+</div>
+<div class="overlay" id="deleteInspModal">
+  <div class="modal">
+    <h3>🗑️ Delete Inspection Log?</h3>
+    <p style="font-size:0.84rem;color:var(--sub);">Hindi na mababawi ito.</p>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('deleteInspModal')">Kanselahin</button><button class="btn btn-danger" onclick="confirmDeleteInsp()">I-delete</button></div>
+  </div>
+</div>
+
+<!-- EMAIL NOTIFICATION MODAL -->
+<div class="overlay" id="emailModal">
+  <div class="modal" style="max-width:560px;">
+    <h3>📧 Send Inspection Result to Adviser</h3>
+    <div id="emailModalBody">
+
+      <!-- EmailJS Setup warning (shown if not configured) -->
+      <div id="emailjsSetupBanner" style="background:#fff3e0;border:1.5px solid #ffb74d;border-radius:10px;padding:13px 16px;margin-bottom:14px;font-size:0.78rem;color:#e65100;display:none;">
+        <div style="font-weight:800;margin-bottom:6px;">⚙️ I-setup muna ang EmailJS para makapag-send ng real emails</div>
+        <div style="font-weight:600;line-height:1.7;color:#bf360c;">
+          1. Pumunta sa <a href="https://www.emailjs.com" target="_blank" style="color:#e65100;font-weight:800;">emailjs.com</a> → Mag-sign up (libre)<br>
+          2. Add Email Service (Gmail, Outlook, etc.) → kopyahin ang <strong>Service ID</strong><br>
+          3. Create Email Template → kopyahin ang <strong>Template ID</strong><br>
+          4. Account → API Keys → kopyahin ang <strong>Public Key</strong><br>
+          5. I-paste dito sa ibaba ↓
+        </div>
+      </div>
+
+      <!-- EmailJS Credentials (collapsible) -->
+      <details id="emailjsCredDetails" style="margin-bottom:14px;">
+        <summary style="cursor:pointer;font-size:0.75rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:0.06em;padding:8px 12px;background:var(--bg);border-radius:8px;list-style:none;">⚙️ EmailJS Configuration <span id="ejsConfigStatus" style="margin-left:6px;"></span></summary>
+        <div style="padding:12px;border:1.5px solid var(--border);border-radius:0 0 8px 8px;background:#fff;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div class="fg"><label>Service ID</label><input type="text" id="ejs_service" placeholder="service_xxxxxxx"></div>
+            <div class="fg"><label>Template ID</label><input type="text" id="ejs_template" placeholder="template_xxxxxxx"></div>
+          </div>
+          <div class="fg"><label>Public Key</label><input type="text" id="ejs_pubkey" placeholder="xxxxxxxxxxxxxxxxxxxx"></div>
+          <button class="btn btn-teal btn-sm" style="margin-top:8px;" onclick="saveEmailjsConfig()">💾 Save Config</button>
+          <div id="ejsSaveMsg" style="font-size:0.74rem;font-weight:700;color:var(--green);margin-top:6px;display:none;">✅ Config saved!</div>
+        </div>
+      </details>
+
+      <div style="margin-bottom:12px;">
+        <div class="fg"><label>📧 To (Adviser Email)</label><input type="email" id="emailTo" placeholder="adviser@deped.gov.ph"></div>
+        <div class="fg"><label>📝 Subject</label><input type="text" id="emailSubject" style="background:var(--bg);"></div>
+      </div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Preview ng Email:</div>
+      <div class="email-preview" id="emailPreviewText"></div>
+      <div class="email-status" id="emailStatus"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('emailModal')">Kanselahin</button>
+      <button class="btn btn-primary" id="btnActuallySend" onclick="actuallySendEmail()">
+        <span id="sendBtnText">📤 I-Send ang Email</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+
+
+
+const REC_KEY  = 'deped_waste_records_v3';
+const SEC_KEY  = 'deped_sections_v1';
+const INS_KEY  = 'deped_inspections_v1';
+// Safe storage wrapper (works even if localStorage is blocked)
+const _store = {};
+function _getItem(k){ try{ return localStorage.getItem(k); }catch(e){ return _store[k]||null; } }
+function _setItem(k,v){ try{ localStorage.setItem(k,v); }catch(e){} _store[k]=v; }
+let records     = JSON.parse(_getItem(REC_KEY) || '[]');
+let sections    = JSON.parse(_getItem(SEC_KEY) || '[]');
+let inspections = JSON.parse(_getItem(INS_KEY) || '[]');
+function saveRecords()     { _setItem(REC_KEY, JSON.stringify(records)); }
+function saveSections()    { _setItem(SEC_KEY, JSON.stringify(sections)); }
+function saveInspections() { _setItem(INS_KEY, JSON.stringify(inspections)); }
+const CHECKLIST = [
+  {
+    id:'segregation', title:'🟢🔵🟡🔴 Proper Waste Segregation', items:[
+      {id:'seg1', text:'All biodegradable waste is in the GREEN bin',         desc:'Food, fruits, vegetables, leaves, and other biodegradable waste'},
+      {id:'seg2', text:'All non-biodegradable waste is in the BLUE bin',           desc:'Plastic, styrofoam, bags, and other non-biodegradable items'},
+      {id:'seg3', text:'All recyclable waste is in the YELLOW bin',                desc:'Paper, cardboard, cans, glass bottles, metal, cloth'},
+      {id:'seg4', text:'All hazardous waste is in the RED bin',              desc:'Batteries, medicine, chemicals, bulbs, ink, pesticides'},
+      {id:'seg5', text:'No waste placed in the wrong bin',              desc:'No cross-contamination between bins'},
+      {id:'seg6', text:'Large waste items are cut/broken before disposal',    desc:'To save space in the bin'},
+    ]
+  },
+  {
+    id:'cleanliness', title:'🧹 Cleanliness of Waste Area', items:[
+      {id:'cln1', text:'No waste scattered around or on the floor of the bin area',       desc:'Area is clean with no scattered waste'},
+      {id:'cln2', text:'No foul odor around the waste bins',      desc:'Especially for biodegradable and hazardous bins'},
+      {id:'cln3', text:'Bins are not full and have sufficient space', desc:'Not exceeding 3/4 of bin capacity'},
+      {id:'cln4', text:'Damaged or dirty bin liners/bags are replaced',  desc:'The liner or bag inside the bin is new and clean'},
+      {id:'cln5', text:'Pathway to and from the waste area is clean',       desc:'Access is not blocked by other items or waste'},
+    ]
+  },
+  {
+    id:'bins', title:'🗑️ Bin Condition and Cleanliness', items:[
+      {id:'bin1', text:'All 4 bins are present and complete',         desc:'Green, Blue, Yellow, and Red bin - all intact and complete'},
+      {id:'bin2', text:'Bins have proper labels and colors',              desc:'Clearly labeled with the type of waste for each bin'},
+      {id:'bin3', text:'Bins have no tears, holes, or damage',           desc:'Bin is intact and waste does not overflow'},
+      {id:'bin4', text:'Bins have lids or covers',        desc:'Especially biodegradable and hazardous to prevent odor and flies'},
+      {id:'bin5', text:'Outside of bin is clean - no stains or dirt',      desc:'Exterior of bins is regularly cleaned'},
+      {id:'bin6', text:'Bins are placed in the proper location',             desc:'Accessible, not blocking pathways, with adequate ventilation'},
+    ]
+  },
+  {
+    id:'weight', title:'⚖️ Waste Weighing and Documentation', items:[
+      {id:'wt1',  text:'Waste is weighed before disposal',                   desc:'Weight (kg) is recorded before collection'},
+      {id:'wt2',  text:'Waste record form is completely filled out',        desc:'Date, section, adviser, and weight per bin are entered'},
+      {id:'wt3',  text:'Waste amount is consistent with the previous week', desc:'No significant drop that may indicate segregation issues'},
+    ]
+  },
+  {
+    id:'practice', title:'🌿 Additional Waste Management Practices', items:[
+      {id:'pr1',  text:'Students actively segregate their waste',  desc:'Students are seen placing waste in the correct bins'},
+      {id:'pr2',  text:'Room/area has a visible waste segregation guide', desc:'A chart or poster on proper segregation is displayed'},
+      {id:'pr3',  text:'No single-use plastics are thrown away whole',        desc:'Bottles, bags, and containers are processed before disposal'},
+      {id:'pr4',  text:'A designated student/teacher supervises the waste area', desc:'An eco-officer or responsible person is monitoring'},
+      {id:'pr5',  text:'Ang leftover na pagkain ay naipapasa sa compost o hayop', desc:'Nagiging pataba o pinapakain sa mga hayop ang food waste'},
+    ]
+  }
+];
+let clState = {};
+function initClState() {
+  clState = {};
+  CHECKLIST.forEach(g => g.items.forEach(it => { clState[it.id] = {v: null, remark: ''}; }));
+}
+initClState();
+function seedSections() {
+  if (sections.length) return;
+  [{grade:'Grade 7',name:'Narra',adviser:'Ms. Maria Santos',remarks:''},{grade:'Grade 7',name:'Molave',adviser:'Mr. Jose Reyes',remarks:''},{grade:'Grade 8',name:'Mahogany',adviser:'Ms. Ana Cruz',remarks:''},{grade:'Grade 8',name:'Acacia',adviser:'Mr. Pedro Dela Torre',remarks:'Science class'},{grade:'Grade 9',name:'Sampaguita',adviser:'Ms. Lina Villanueva',remarks:''},{grade:'Grade 9',name:'Ilang-ilang',adviser:'Mr. Carlos Bautista',remarks:''},{grade:'Grade 10',name:'Mariposa',adviser:'Ms. Rosa Aquino',remarks:''},]
+  .forEach(d => sections.push({id:Date.now()+Math.random(),...d}));
+  saveSections();
+}
+function seedRecords() {
+  if (records.length) return;
+  const today = new Date();
+  sections.slice(0,5).forEach((s,i)=>{
+    for(let d=0;d<5;d++){const dt=new Date(today);dt.setDate(dt.getDate()-d*3-i);records.push({id:Date.now()-i*100000-d*1000,date:dt.toISOString().slice(0,10),grade:s.grade,section:s.name,teacher:s.adviser,green:+(Math.random()*8+1).toFixed(1),blue:+(Math.random()*6+0.5).toFixed(1),yellow:+(Math.random()*4+0.3).toFixed(1),red:+(Math.random()*1+0.1).toFixed(1),notes:''});}
+  });
+  saveRecords();
+}
+function seedInspections() {
+  if (inspections.length) return;
+  const today = new Date();
+  sections.slice(0,4).forEach((s,i) => {
+    const dt = new Date(today); dt.setDate(dt.getDate()-i*4);
+    const items = {};
+    CHECKLIST.forEach(g => g.items.forEach(it => {
+      items[it.id] = {v: Math.random()>0.25?'pass':'fail', remark:''};
+    }));
+    const pass = Object.values(items).filter(x=>x.v==='pass').length;
+    const total = Object.values(items).length;
+    const pct = Math.round(pass/total*100);
+    inspections.push({id:Date.now()-i*50000, date:dt.toISOString().slice(0,10), grade:s.grade, section:s.name, adviser:s.adviser, inspector:'Mr./Ms. Principal', items, remarks:'Demo inspection.', pass, fail:total-pass, na:0, pct, result:pct>=80?'Compliant':pct>=60?'Needs Improvement':'Non-Compliant'});
+  });
+  saveInspections();
+}
+seedSections(); seedRecords(); seedInspections();
+const titles = {dashboard:'📊 Dashboard',sections:'🏷️ Sections',add:'📝 Add Record',records:'📋 All Records',inspections:'🔍 Inspection Logs',reports:'📈 Reports',usermgmt:'👥 User Management',reportsettings:'⚙️ Report Settings'};
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');});
+  document.getElementById('pageTitle').textContent = titles[id]||'';
+  // Update bottom nav active state
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  const bnavBtn=document.getElementById('bnav-'+id);
+  if(bnavBtn) bnavBtn.classList.add('active');
+  // Close mobile sidebar on nav
+  closeMobileSidebar();
+  if(id==='dashboard') renderDashboard();
+  if(id==='sections')  {renderSections();renderSectionSummary();}
+  if(id==='add')       {populateGradeDropdown('f');populateGradeDropdown('i');buildChecklist();}
+  if(id==='records')   renderRecords();
+  if(id==='inspections') renderInspectionLogs();
+  if(id==='reports')   renderReports();
+  if(id==='usermgmt')  renderUserTable();
+  if(id==='reportsettings') initReportSettings();
+}
+function toggleMobileSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const ov=document.getElementById('sidebarOverlay');
+  sb.classList.toggle('mobile-open');
+  ov.classList.toggle('show');
+}
+function closeMobileSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const ov=document.getElementById('sidebarOverlay');
+  sb.classList.remove('mobile-open');
+  ov.classList.remove('show');
+}
+function switchTab(t) {
+  ['waste','inspect'].forEach(x=>{
+    document.getElementById('tab-'+x).classList.toggle('active',x===t);
+    document.getElementById('tab-'+x+'-btn').classList.toggle('active',x===t);
+  });
+}
+function fmtDate(iso){const d=new Date(iso+'T00:00:00');return d.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});}
+const today=new Date();
+document.getElementById('todayDate').textContent=today.toLocaleDateString('en-PH',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+document.getElementById('f_date').value=today.toISOString().slice(0,10);
+document.getElementById('i_date').value=today.toISOString().slice(0,10);
+function populateGradeDropdown(pfx) {
+  const grades=[...new Set(sections.map(s=>s.grade))].sort();
+  const sel=document.getElementById(pfx+'_grade');
+  const prev=sel.value;
+  sel.innerHTML='<option value="">-- Select Grade --</option>'+grades.map(g=>`<option${g===prev?' selected':''}>${g}</option>`).join('');
+}
+function onGradeChange(pfx) {
+  const grade=document.getElementById(pfx+'_grade').value;
+  const secSel=document.getElementById(pfx+'_section');
+  if(pfx==='f'){document.getElementById('f_teacher').value='';document.getElementById('f_adviserHint').classList.remove('show');document.getElementById('f_sectionInfoBar').style.display='none';}
+  else{document.getElementById('i_adviserRow').style.display='none';}
+  if(!grade){secSel.innerHTML='<option value="">-- Select Section --</option>';secSel.disabled=true;return;}
+  const secs=sections.filter(s=>s.grade===grade).sort((a,b)=>a.name.localeCompare(b.name));
+  secSel.innerHTML='<option value="">-- Select Section --</option>'+secs.map(s=>`<option value="${s.name}">${s.name} (${s.adviser})</option>`).join('');
+  secSel.disabled=secs.length===0;
+  if(!secs.length)showToast('⚠️ No sections found for this grade. Please add one in Sections.');
+}
+function onSectionChange(pfx) {
+  const grade=document.getElementById(pfx+'_grade').value;
+  const secName=document.getElementById(pfx+'_section').value;
+  if(!secName){
+    if(pfx==='f'){document.getElementById('f_teacher').value='';document.getElementById('f_adviserHint').classList.remove('show');document.getElementById('f_sectionInfoBar').style.display='none';}
+    else document.getElementById('i_adviserRow').style.display='none';
+    return;
+  }
+  const sec=sections.find(s=>s.grade===grade&&s.name===secName);
+  if(!sec)return;
+  if(pfx==='f'){
+    document.getElementById('f_teacher').value=sec.adviser;
+    document.getElementById('f_adviserHint').classList.add('show');
+    const bar=document.getElementById('f_sectionInfoBar');
+    bar.style.display='flex';
+    document.getElementById('f_sectionInfoText').textContent=`${sec.grade} - ${sec.name} | Adviser: ${sec.adviser}${sec.remarks?' | '+sec.remarks:''}`;
+  } else {
+    const row=document.getElementById('i_adviserRow');
+    row.style.display='flex';
+    document.getElementById('i_sectionInfoText').textContent=`${sec.grade} - ${sec.name} | Adviser: ${sec.adviser}${sec.remarks?' | '+sec.remarks:''}`;
+  }
+}
+function buildChecklist() {
+  const body=document.getElementById('checklistBody');
+  body.innerHTML=CHECKLIST.map(g=>`
+    <div class="cl-group" id="grp-${g.id}">
+      <div class="cl-group-title">
+        ${g.title}
+        <div class="cl-group-progress">
+          <div class="cl-mini-bar"><div class="cl-mini-fill green" id="mini-${g.id}" style="width:0%"></div></div>
+          <span class="cl-group-score" id="gscore-${g.id}">0/${g.items.length}</span>
+        </div>
+      </div>
+      <div class="cl-items">
+        ${g.items.map(it=>`
+          <div class="cl-item" id="cli-${it.id}">
+            <div class="cl-toggle">
+              <button class="cl-btn" id="pass-${it.id}" onclick="setCheck('${it.id}','pass')" title="✅ Compliant">✅</button>
+              <button class="cl-btn" id="fail-${it.id}" onclick="setCheck('${it.id}','fail')" title="❌ Non-Compliant">❌</button>
+            </div>
+            <div class="cl-text" style="flex:1;">
+              <strong>${it.text}</strong>
+              <span>${it.desc}</span>
+              <div class="cl-remark">
+                <input type="text" id="rem-${it.id}" placeholder="Remarks / obserbasyon (opsyonal)..." oninput="clState['${it.id}'].remark=this.value">
+              </div>
+            </div>
+            <span class="cl-status-label" id="lbl-${it.id}">--</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+  updateScoreDisplay();
+}
+function setCheck(id, val) {
+  if(clState[id].v===val) val=null;
+  clState[id].v=val;
+  const item=document.getElementById('cli-'+id);
+  item.className='cl-item'+(val?' '+val:'');
+  document.getElementById('pass-'+id).className='cl-btn'+(val==='pass'?' pass-active':'');
+  document.getElementById('fail-'+id).className='cl-btn'+(val==='fail'?' fail-active':'');
+  const lbl=document.getElementById('lbl-'+id);
+  if(val==='pass'){lbl.textContent='✅ Compliant';lbl.style.background='var(--green)';}
+  else if(val==='fail'){lbl.textContent='❌ Non-Compliant';lbl.style.background='var(--red)';}
+  else{lbl.textContent='--';lbl.style.background='#e0e0e0';lbl.style.color='var(--sub)';}
+  lbl.style.color=val?'white':'var(--sub)';
+  updateScoreDisplay();
+}
+function updateScoreDisplay() {
+  let totalPass=0,totalFail=0,totalNA=0;
+  CHECKLIST.forEach(g=>{
+    let gpass=0;
+    g.items.forEach(it=>{
+      const v=clState[it.id].v;
+      if(v==='pass'){gpass++;totalPass++;}
+      else if(v==='fail')totalFail++;
+      else totalNA++;
+    });
+    const pct=Math.round(gpass/g.items.length*100);
+    const fill=document.getElementById('mini-'+g.id);
+    if(fill){fill.style.width=pct+'%';fill.style.background=pct>=80?'var(--green-l)':pct>=50?'var(--yellow-l)':'var(--red-l)';}
+    const gs=document.getElementById('gscore-'+g.id);
+    if(gs)gs.textContent=gpass+'/'+g.items.length;
+  });
+  const answered=totalPass+totalFail;
+  const pct=answered>0?Math.round(totalPass/answered*100):0;
+  document.getElementById('passCount').textContent=totalPass;
+  document.getElementById('failCount').textContent=totalFail;
+  document.getElementById('naCount').textContent=totalNA;
+  const circ=2*Math.PI*46;
+  const fill=document.getElementById('ringFill');
+  const offset=circ-(circ*(answered>0?pct/100:0));
+  fill.style.strokeDashoffset=offset;
+  fill.style.stroke=pct>=80?'var(--green-l)':pct>=60?'var(--yellow-l)':'var(--red-l)';
+  const pctEl=document.getElementById('ringPct');
+  pctEl.textContent=answered>0?pct+'%':'--';
+  pctEl.style.color=pct>=80?'var(--green)':pct>=60?'var(--yellow)':'var(--red)';
+  const tag=document.getElementById('ringTag');
+  if(!answered){tag.textContent='Pending';tag.style.background='var(--bg)';tag.style.color='var(--sub)';}
+  else if(pct>=80){tag.textContent='✅ Compliant';tag.style.background='var(--green-bg)';tag.style.color='var(--green)';}
+  else if(pct>=60){tag.textContent='⚠️ Needs Improvement';tag.style.background='var(--yellow-bg)';tag.style.color='var(--yellow)';}
+  else{tag.textContent='❌ Non-Compliant';tag.style.background='var(--red-bg)';tag.style.color='var(--red)';}
+}
+function resetChecklist() {
+  initClState();
+  buildChecklist();
+  document.getElementById('i_remarks').value='';
+  document.getElementById('inspectResult').style.display='none';
+  showToast('🔄 Checklist reset.');
+}
+function saveInspection() {
+  const date=document.getElementById('i_date').value;
+  const grade=document.getElementById('i_grade').value;
+  const section=document.getElementById('i_section').value;
+  const inspector=document.getElementById('i_inspector').value.trim();
+  const remarks=document.getElementById('i_remarks').value.trim();
+  if(!date){showToast('❗ Please select a date.');return;}
+  if(!grade){showToast('❗ Please select a Grade Level.');return;}
+  if(!section){showToast('❗ Please select a Section.');return;}
+  const answered=Object.values(clState).filter(x=>x.v!==null).length;
+  if(answered===0){showToast('❗ Sagutin muna ang mga checklist items.');return;}
+  const sec=sections.find(s=>s.grade===grade&&s.name===section);
+  const pass=Object.values(clState).filter(x=>x.v==='pass').length;
+  const fail=Object.values(clState).filter(x=>x.v==='fail').length;
+  const na=Object.values(clState).filter(x=>x.v===null).length;
+  const pct=Math.round(pass/(pass+fail||1)*100);
+  const result=pct>=80?'Compliant':pct>=60?'Needs Improvement':'Non-Compliant';
+  const rec={
+    id:Date.now(),date,grade,section,
+    adviser:sec?sec.adviser:'',
+    inspector,items:JSON.parse(JSON.stringify(clState)),
+    remarks,pass,fail,na,pct,result
+  };
+  inspections.unshift(rec);saveInspections();
+  const res=document.getElementById('inspectResult');
+  const banner=document.getElementById('resultBanner');
+  res.style.display='block';
+  banner.className='result-banner '+(result==='Compliant'?'compliant':result==='Needs Improvement'?'needs-improvement':'non-compliant');
+  document.getElementById('resultIcon').textContent=result==='Compliant'?'✅':result==='Needs Improvement'?'⚠️':'❌';
+  document.getElementById('resultTitle').textContent=result;
+  document.getElementById('resultSub').textContent=`${section} (${grade}) | Inspector: ${inspector||'--'} | Date: ${fmtDate(date)}`;
+  document.getElementById('resultScore').textContent=pct+'%';
+  res.scrollIntoView({behavior:'smooth',block:'start'});
+  // Show email button and pre-fill
+  const secObj=sections.find(s=>s.grade===grade&&s.name===section);
+  const emailBtn=document.getElementById('btnSendEmail');
+  emailBtn.style.display='inline-flex';
+  emailBtn._inspData=rec;
+  emailBtn._secEmail=secObj&&secObj.email?secObj.email:'';
+  showToast('✅ Saved ang inspection!');
+}
+function saveRecord() {
+  const date=document.getElementById('f_date').value;
+  const grade=document.getElementById('f_grade').value;
+  const section=document.getElementById('f_section').value;
+  const teacher=document.getElementById('f_teacher').value.trim();
+  const green=parseFloat(document.getElementById('f_green').value)||0;
+  const blue=parseFloat(document.getElementById('f_blue').value)||0;
+  const yellow=parseFloat(document.getElementById('f_yellow').value)||0;
+  const red=parseFloat(document.getElementById('f_red').value)||0;
+  const notes=document.getElementById('f_notes').value.trim();
+  if(!date){showToast('❗ Please select a date.');return;}
+  if(!grade){showToast('❗ Please select a Grade Level.');return;}
+  if(!section){showToast('❗ Please select a Section.');return;}
+  if(green+blue+yellow+red===0){showToast('❗ Please enter waste amounts.');return;}
+  const rec={id:Date.now(),date,grade,section,teacher,green,blue,yellow,red,notes};
+  records.unshift(rec);saveRecords();
+  const total=(green+blue+yellow+red).toFixed(1);
+  document.getElementById('addSummaryBody').innerHTML=`
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <strong>${fmtDate(date)}</strong><span class="grade-chip">${grade}</span><span style="font-weight:700;">${section}</span>
+      <span style="color:var(--sub);font-size:0.8rem;">👩‍🏫 ${teacher||'--'}</span>
+      <span class="badge badge-green">🟢 ${green.toFixed(1)} kg</span><span class="badge badge-blue">🔵 ${blue.toFixed(1)} kg</span>
+      <span class="badge badge-yellow">🟡 ${yellow.toFixed(1)} kg</span><span class="badge badge-red">🔴 ${red.toFixed(1)} kg</span>
+      <strong>= ${total} kg</strong>
+    </div>${notes?`<div style="margin-top:8px;font-size:0.78rem;color:var(--sub);">📝 ${notes}</div>`:''}`;
+  document.getElementById('addSummary').style.display='block';
+  clearForm();showToast('✅ Saved ang record!');
+}
+function clearForm(){
+  ['f_grade','f_notes'].forEach(id=>document.getElementById(id).value='');
+  ['f_green','f_blue','f_yellow','f_red'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_section').innerHTML='<option value="">-- Select Section --</option>';
+  document.getElementById('f_section').disabled=true;
+  document.getElementById('f_teacher').value='';
+  document.getElementById('f_date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('f_adviserHint').classList.remove('show');
+  document.getElementById('f_sectionInfoBar').style.display='none';
+}
+function renderDashboard(){
+  let t={green:0,blue:0,yellow:0,red:0};
+  records.forEach(r=>{t.green+=r.green;t.blue+=r.blue;t.yellow+=r.yellow;t.red+=r.red;});
+  const compRate=inspections.length?Math.round(inspections.filter(x=>x.result==='Compliant').length/inspections.length*100):0;
+  document.getElementById('statRow').innerHTML=`
+    <div class="stat-card green"><div class="stat-top"><div class="stat-label">🟢 Biodegradable</div><div class="stat-icon">🌿</div></div><div class="stat-val">${t.green.toFixed(1)}</div><div class="stat-unit">kilogram total</div></div>
+    <div class="stat-card blue"><div class="stat-top"><div class="stat-label">🔵 Non-Biodegradable</div><div class="stat-icon">🛍️</div></div><div class="stat-val">${t.blue.toFixed(1)}</div><div class="stat-unit">kilogram total</div></div>
+    <div class="stat-card yellow"><div class="stat-top"><div class="stat-label">🟡 Recyclable</div><div class="stat-icon">♻️</div></div><div class="stat-val">${t.yellow.toFixed(1)}</div><div class="stat-unit">kilogram total</div></div>
+    <div class="stat-card teal"><div class="stat-top"><div class="stat-label">🔍 Compliance Rate</div><div class="stat-icon">📋</div></div><div class="stat-val">${compRate}%</div><div class="stat-unit">${inspections.length} inspections</div></div>`;
+  const days=[];for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+  document.getElementById('weekLabel').textContent=fmtDate(days[0])+' - '+fmtDate(days[6]);
+  const maxV=Math.max(...days.map(day=>{const dr=records.filter(r=>r.date===day);return dr.reduce((s,r)=>s+r.green+r.blue+r.yellow+r.red,0);}),0.1);
+  document.getElementById('weeklyChart').innerHTML=days.map(day=>{
+    const dr=records.filter(r=>r.date===day);
+    const g=dr.reduce((s,r)=>s+r.green,0),b=dr.reduce((s,r)=>s+r.blue,0),y=dr.reduce((s,r)=>s+r.yellow,0),rd=dr.reduce((s,r)=>s+r.red,0);
+    const sc=p=>Math.round((p/maxV)*110);
+    return`<div class="week-col"><div class="week-bars"><div class="week-bar green" style="height:${sc(g)}px"></div><div class="week-bar blue" style="height:${sc(b)}px"></div><div class="week-bar yellow" style="height:${sc(y)}px"></div><div class="week-bar red" style="height:${sc(rd)}px"></div></div></div>`;
+  }).join('');
+  const grand=t.green+t.blue+t.yellow+t.red||1;
+  document.getElementById('binChart').innerHTML=[{label:'🟢 Biodegradable',val:t.green,cls:'green'},{label:'🔵 Non-Biodegradable',val:t.blue,cls:'blue'},{label:'🟡 Recyclable',val:t.yellow,cls:'yellow'},{label:'🔴 Hazardous',val:t.red,cls:'red'}].map(({label,val,cls})=>`<div class="chart-row"><div class="chart-label">${label}</div><div class="chart-bar-bg"><div class="chart-bar ${cls}" style="width:${Math.round(val/grand*100)}%">${val>0.5?val.toFixed(1)+'kg':''}</div></div><div class="chart-val">${val.toFixed(1)}<span style="font-size:0.6rem;color:var(--sub);">kg</span></div></div>`).join('');
+  const recent=[...records].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  document.getElementById('recentBody').innerHTML=recent.length===0?`<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--sub);">No records yet.</td></tr>`:recent.map(r=>{const total=(r.green+r.blue+r.yellow+r.red).toFixed(1);return`<tr><td><strong>${fmtDate(r.date)}</strong></td><td><span class="grade-chip">${r.grade||'--'}</span></td><td>${r.section||'--'}</td><td>${r.teacher||'--'}</td><td><span class="badge badge-green">${r.green.toFixed(1)}</span></td><td><span class="badge badge-blue">${r.blue.toFixed(1)}</span></td><td><span class="badge badge-yellow">${r.yellow.toFixed(1)}</span></td><td><span class="badge badge-red">${r.red.toFixed(1)}</span></td><td><strong>${total} kg</strong></td></tr>`;}).join('');
+}
+let editSectionId=null,deleteSectionId=null;
+function updateSecSelBtn(){
+  const checked=document.querySelectorAll('.chk-sec:checked');
+  const btn=document.getElementById('btnDeleteSelSec');
+  const cntEl=document.getElementById('selSecCount');
+  if(btn)btn.style.display=checked.length?'inline-flex':'none';
+  if(cntEl)cntEl.textContent=checked.length;
+}
+function deleteSelectedSections(){
+  const ids=[...document.querySelectorAll('.chk-sec:checked')].map(c=>c.dataset.id);
+  if(!ids.length)return;
+  if(!confirm(`I-delete ang ${ids.length} napiling section?`))return;
+  sections=sections.filter(s=>!ids.includes(s.id));
+  saveSections();renderSections();renderSectionSummary();showToast(`🗑️ ${ids.length} section(s) deleted.`);
+}
+function clearAllSections(){
+  if(!sections.length){showToast('Walang sections.');return;}
+  if(!confirm(`I-clear ang LAHAT ng ${sections.length} sections? Hindi na ito mababalik!`))return;
+  sections=[];saveSections();renderSections();renderSectionSummary();showToast('🧹 Lahat ng sections ay na-clear!');
+}
+function renderSections(){
+  const q=(document.getElementById('secSearch').value||'').toLowerCase();
+  const gf=document.getElementById('secGradeFilter').value;
+  let filtered=sections.filter(s=>(!q||s.name.toLowerCase().includes(q)||s.adviser.toLowerCase().includes(q)||s.grade.toLowerCase().includes(q))&&(!gf||s.grade===gf)).sort((a,b)=>a.grade.localeCompare(b.grade)||a.name.localeCompare(b.name));
+  const list=document.getElementById('sectionList'),empty=document.getElementById('emptySections');
+  if(!filtered.length){list.innerHTML='';empty.style.display='block';updateSecSelBtn();return;}
+  empty.style.display='none';
+  list.innerHTML=filtered.map(s=>{
+    const recs=records.filter(r=>r.section===s.name&&r.grade===s.grade).length;
+    const insp=inspections.filter(x=>x.section===s.name&&x.grade===s.grade).length;
+    return`<div class="sl-card" style="position:relative;">
+      <div style="position:absolute;top:10px;right:10px;" class="no-print"><input type="checkbox" class="chk-sec" data-id="${s.id}" onchange="updateSecSelBtn()" title="Piliin"/></div>
+      <div class="sl-card-top"><div class="sl-card-name">${s.name}</div><span style="font-size:0.68rem;font-weight:800;padding:2px 9px;border-radius:6px;background:var(--green-bg);color:var(--green);">${s.grade}</span></div>
+      <div style="font-size:0.78rem;color:var(--sub);font-weight:600;">👩‍🏫 ${s.adviser}</div>
+      ${s.remarks?`<div style="font-size:0.7rem;color:var(--sub);font-style:italic;">📌 ${s.remarks}</div>`:''}
+      <div style="font-size:0.7rem;color:var(--sub);font-weight:700;display:flex;gap:12px;margin-top:2px;"><span>📋 ${recs} records</span><span>🔍 ${insp} inspections</span></div>
+      <div class="sl-card-actions no-print"><button class="btn btn-edit btn-sm" onclick="openEditSection('${s.id}')">✏️ Edit</button><button class="btn btn-danger btn-sm" onclick="openDeleteSection('${s.id}')">🗑️ Delete</button></div>
+    </div>`;
+  }).join('');
+  updateSecSelBtn();
+}
+function renderSectionSummary(){
+  const body=document.getElementById('sectionSummaryBody'),empty=document.getElementById('emptySectionSummary');
+  const sorted=[...sections].sort((a,b)=>a.grade.localeCompare(b.grade)||a.name.localeCompare(b.name));
+  if(!sorted.length){body.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  body.innerHTML=sorted.map(s=>{
+    const recs=records.filter(r=>r.section===s.name&&r.grade===s.grade);
+    const g=recs.reduce((x,r)=>x+r.green,0),b=recs.reduce((x,r)=>x+r.blue,0),y=recs.reduce((x,r)=>x+r.yellow,0),rd=recs.reduce((x,r)=>x+r.red,0);
+    const insp=inspections.filter(x=>x.section===s.name&&x.grade===s.grade);
+    const compPct=insp.length?Math.round(insp.filter(x=>x.result==='Compliant').length/insp.length*100):null;
+    return`<tr><td><span class="grade-chip">${s.grade}</span></td><td><strong>${s.name}</strong></td><td>${s.adviser}</td><td><span class="badge badge-green">${g.toFixed(1)}</span></td><td><span class="badge badge-blue">${b.toFixed(1)}</span></td><td><span class="badge badge-yellow">${y.toFixed(1)}</span></td><td><span class="badge badge-red">${rd.toFixed(1)}</span></td><td><strong>${(g+b+y+rd).toFixed(1)} kg</strong></td><td>${insp.length?`<span class="badge badge-teal">${compPct}% (${insp.length}x)</span>`:'<span class="badge badge-gray">--</span>'}</td></tr>`;
+  }).join('');
+}
+function openSectionModal(){editSectionId=null;document.getElementById('sectionModalTitle').textContent='🏷️ New Section';['sm_grade','sm_name','sm_adviser','sm_email','sm_remarks'].forEach(id=>document.getElementById(id).value='');document.getElementById('sectionModal').classList.add('show');}
+function openEditSection(id){const s=sections.find(x=>x.id==id);if(!s)return;editSectionId=id;document.getElementById('sectionModalTitle').textContent='✏️ Edit Section';document.getElementById('sm_grade').value=s.grade;document.getElementById('sm_name').value=s.name;document.getElementById('sm_adviser').value=s.adviser;document.getElementById('sm_email').value=s.email||'';document.getElementById('sm_remarks').value=s.remarks||'';document.getElementById('sectionModal').classList.add('show');}
+function saveSection(){
+  const grade=document.getElementById('sm_grade').value.trim(),name=document.getElementById('sm_name').value.trim(),adviser=document.getElementById('sm_adviser').value.trim(),email=document.getElementById('sm_email').value.trim(),remarks=document.getElementById('sm_remarks').value.trim();
+  if(!grade){showToast('❗ Please select a Grade Level.');return;}if(!name){showToast('❗ Ilagay ang pangalan ng section.');return;}if(!adviser){showToast('❗ Ilagay ang pangalan ng adviser.');return;}
+  if(editSectionId){const idx=sections.findIndex(x=>x.id==editSectionId);if(idx>-1)sections[idx]={...sections[idx],grade,name,adviser,email,remarks};}
+  else{if(sections.some(s=>s.grade===grade&&s.name.toLowerCase()===name.toLowerCase())){showToast('❗ A section with that name already exists.');return;}sections.push({id:Date.now(),grade,name,adviser,email,remarks});}
+  saveSections();closeModal('sectionModal');renderSections();renderSectionSummary();showToast(editSectionId?'✅ Updated!':'✅ Section added!');
+}
+function openDeleteSection(id){deleteSectionId=id;document.getElementById('deleteSectionModal').classList.add('show');}
+function confirmDeleteSection(){sections=sections.filter(s=>s.id!=deleteSectionId);saveSections();closeModal('deleteSectionModal');renderSections();renderSectionSummary();showToast('🗑️ Deleted ang section.');}
+let deleteId=null;
+function updateRecSelBtn(){
+  const checked=document.querySelectorAll('.chk-rec:checked');
+  const btn=document.getElementById('btnDeleteSelRec');
+  const cntEl=document.getElementById('selRecCount');
+  if(btn){btn.style.display=checked.length?'inline-flex':'none';}
+  if(cntEl)cntEl.textContent=checked.length;
+}
+function toggleAllRecords(chk){
+  document.querySelectorAll('.chk-rec').forEach(c=>c.checked=chk.checked);
+  updateRecSelBtn();
+}
+function deleteSelectedRecords(){
+  const ids=[...document.querySelectorAll('.chk-rec:checked')].map(c=>+c.dataset.id);
+  if(!ids.length)return;
+  if(!confirm(`I-delete ang ${ids.length} napiling record?`))return;
+  records=records.filter(r=>!ids.includes(r.id));
+  saveRecords();renderRecords();showToast(`🗑️ ${ids.length} record(s) deleted.`);
+}
+function clearAllRecords(){
+  if(!records.length){showToast('Walang records.');return;}
+  if(!confirm(`I-clear ang LAHAT ng ${records.length} records? Hindi na ito mababalik!`))return;
+  records=[];saveRecords();renderRecords();showToast('🧹 Lahat ng records ay na-clear!');
+}
+function renderRecords(){
+  const q=(document.getElementById('searchInput').value||'').toLowerCase();
+  const gf=document.getElementById('filterGrade').value,mf=document.getElementById('filterMonth').value;
+  const grades=[...new Set(records.map(r=>r.grade||''))].filter(Boolean).sort();
+  const gSel=document.getElementById('filterGrade'),gPrev=gSel.value;
+  gSel.innerHTML='<option value="">All Grades</option>'+grades.map(g=>`<option>${g}</option>`).join('');gSel.value=gPrev;
+  const months=[...new Set(records.map(r=>r.date.slice(0,7)))].sort().reverse();
+  const mSel=document.getElementById('filterMonth'),mPrev=mSel.value;
+  mSel.innerHTML='<option value="">All Months</option>'+months.map(m=>{const[yr,mo]=m.split('-');return`<option value="${m}">${new Date(yr,mo-1).toLocaleDateString('en-PH',{year:'numeric',month:'long'})}</option>`;}).join('');mSel.value=mPrev;
+  let filtered=records.filter(r=>{const sm=!q||r.date.includes(q)||(r.section||'').toLowerCase().includes(q)||(r.teacher||'').toLowerCase().includes(q)||(r.grade||'').toLowerCase().includes(q);return sm&&(!gf||r.grade===gf)&&(!mf||r.date.startsWith(mf));}).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('recordCount').textContent=`${filtered.length} record${filtered.length!==1?'s':''}`;
+  const body=document.getElementById('recordsBody'),empty=document.getElementById('emptyRecords');
+  if(!filtered.length){body.innerHTML='';empty.style.display='block';const ca=document.getElementById('chkAllRec');if(ca)ca.checked=false;updateRecSelBtn();return;}empty.style.display='none';
+  body.innerHTML=filtered.map(r=>{const total=(r.green+r.blue+r.yellow+r.red).toFixed(1);return`<tr><td class="no-print"><input type="checkbox" class="chk-rec" data-id="${r.id}" onchange="updateRecSelBtn()"/></td><td><strong>${fmtDate(r.date)}</strong></td><td><span class="grade-chip">${r.grade||'--'}</span></td><td>${r.section||'--'}</td><td>${r.teacher||'--'}</td><td><span class="badge badge-green">${r.green.toFixed(1)}</span></td><td><span class="badge badge-blue">${r.blue.toFixed(1)}</span></td><td><span class="badge badge-yellow">${r.yellow.toFixed(1)}</span></td><td><span class="badge badge-red">${r.red.toFixed(1)}</span></td><td><strong>${total} kg</strong></td><td class="no-print"><button class="btn btn-danger btn-sm" onclick="openDelete(${r.id})">🗑️</button></td></tr>`;}).join('');
+  const ca=document.getElementById('chkAllRec');if(ca)ca.checked=false;
+  updateRecSelBtn();
+}
+function openDelete(id){deleteId=id;document.getElementById('deleteModal').classList.add('show');}
+function confirmDelete(){records=records.filter(r=>r.id!==deleteId);saveRecords();closeModal('deleteModal');renderRecords();showToast('🗑️ Deleted ang record.');}
+let deleteInspId=null;
+function updateInspSelBtn(){
+  const checked=document.querySelectorAll('.chk-insp:checked');
+  const btn=document.getElementById('btnDeleteSelInsp');
+  const cntEl=document.getElementById('selInspCount');
+  if(btn)btn.style.display=checked.length?'inline-flex':'none';
+  if(cntEl)cntEl.textContent=checked.length;
+}
+function toggleAllInsp(chk){
+  document.querySelectorAll('.chk-insp').forEach(c=>c.checked=chk.checked);
+  updateInspSelBtn();
+}
+function deleteSelectedInsp(){
+  const ids=[...document.querySelectorAll('.chk-insp:checked')].map(c=>+c.dataset.id);
+  if(!ids.length)return;
+  if(!confirm(`I-delete ang ${ids.length} napiling inspection log?`))return;
+  inspections=inspections.filter(x=>!ids.includes(x.id));
+  saveInspections();renderInspectionLogs();showToast(`🗑️ ${ids.length} inspection(s) deleted.`);
+}
+function clearAllInsp(){
+  if(!inspections.length){showToast('Walang inspection logs.');return;}
+  if(!confirm(`I-clear ang LAHAT ng ${inspections.length} inspection logs? Hindi na ito mababalik!`))return;
+  inspections=[];saveInspections();renderInspectionLogs();showToast('🧹 Lahat ng logs ay na-clear!');
+}
+function renderInspectionLogs(){
+  const q=(document.getElementById('inspSearch').value||'').toLowerCase();
+  const gf=document.getElementById('inspGradeFilter').value;
+  const rf=document.getElementById('inspResultFilter').value;
+  const grades=[...new Set(inspections.map(x=>x.grade||''))].filter(Boolean).sort();
+  const sel=document.getElementById('inspGradeFilter'),prev=sel.value;
+  sel.innerHTML='<option value="">All Grades</option>'+grades.map(g=>`<option>${g}</option>`).join('');sel.value=prev;
+  let filtered=inspections.filter(x=>{
+    const sm=!q||(x.section||'').toLowerCase().includes(q)||(x.inspector||'').toLowerCase().includes(q)||(x.grade||'').toLowerCase().includes(q);
+    return sm&&(!gf||x.grade===gf)&&(!rf||x.result===rf);
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('inspCount').textContent=`${filtered.length} inspection${filtered.length!==1?'s':''}`;
+  const body=document.getElementById('inspBody'),empty=document.getElementById('emptyInsp');
+  if(!filtered.length){body.innerHTML='';empty.style.display='block';const ca=document.getElementById('chkAllInsp');if(ca)ca.checked=false;updateInspSelBtn();return;}empty.style.display='none';
+  body.innerHTML=filtered.map(x=>{
+    const cls=x.result==='Compliant'?'insp-pass':x.result==='Needs Improvement'?'insp-ni':'insp-fail';
+    const icon=x.result==='Compliant'?'✅':x.result==='Needs Improvement'?'⚠️':'❌';
+    return`<tr>
+      <td class="no-print"><input type="checkbox" class="chk-insp" data-id="${x.id}" onchange="updateInspSelBtn()"/></td>
+      <td><strong>${fmtDate(x.date)}</strong></td>
+      <td><span class="grade-chip">${x.grade||'--'}</span></td>
+      <td>${x.section||'--'}</td>
+      <td>${x.inspector||'--'}</td>
+      <td><strong>${x.pct}%</strong></td>
+      <td><span class="badge badge-green">${x.pass}</span></td>
+      <td><span class="badge badge-red">${x.fail}</span></td>
+      <td><span class="${cls}">${icon} ${x.result}</span></td>
+      <td class="no-print" style="display:flex;gap:5px;">
+        <button class="btn btn-edit btn-sm" onclick="viewInspection(${x.id})">👁️ View</button>
+        <button class="btn btn-danger btn-sm" onclick="openDeleteInsp(${x.id})">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  const ca=document.getElementById('chkAllInsp');if(ca)ca.checked=false;
+  updateInspSelBtn();
+}
+function openDeleteInsp(id){deleteInspId=id;document.getElementById('deleteInspModal').classList.add('show');}
+function confirmDeleteInsp(){inspections=inspections.filter(x=>x.id!==deleteInspId);saveInspections();closeModal('deleteInspModal');renderInspectionLogs();showToast('🗑️ Inspection deleted.');}
+function viewInspection(id){
+  const x=inspections.find(i=>i.id===id);if(!x)return;
+  const pct=x.pct;
+  const banner=pct>=80?`<div class="result-banner compliant" style="border-radius:12px;margin-bottom:16px;"><div class="rb-icon">✅</div><div><div class="rb-title">Compliant</div><div class="rb-sub">${x.section} (${x.grade}) · ${fmtDate(x.date)}</div></div><div style="margin-left:auto;text-align:right;"><div class="rb-score">${pct}%</div><div class="rb-score-label">Score</div></div></div>`:pct>=60?`<div class="result-banner needs-improvement" style="border-radius:12px;margin-bottom:16px;"><div class="rb-icon">⚠️</div><div><div class="rb-title">Needs Improvement</div><div class="rb-sub">${x.section} (${x.grade}) · ${fmtDate(x.date)}</div></div><div style="margin-left:auto;text-align:right;"><div class="rb-score">${pct}%</div><div class="rb-score-label">Score</div></div></div>`:`<div class="result-banner non-compliant" style="border-radius:12px;margin-bottom:16px;"><div class="rb-icon">❌</div><div><div class="rb-title">Non-Compliant</div><div class="rb-sub">${x.section} (${x.grade}) · ${fmtDate(x.date)}</div></div><div style="margin-left:auto;text-align:right;"><div class="rb-score">${pct}%</div><div class="rb-score-label">Score</div></div></div>`;
+  let detailHtml='';
+  CHECKLIST.forEach(g=>{
+    const rows=g.items.map(it=>{const s=x.items[it.id];if(!s)return'';const v=s.v;const icon=v==='pass'?'✅':v==='fail'?'❌':'--';const color=v==='pass'?'var(--green)':v==='fail'?'var(--red)':'var(--sub)';return`<tr><td style="font-size:0.8rem;padding:6px 8px;">${it.text}</td><td style="text-align:center;font-size:1rem;">${icon}</td><td style="font-size:0.75rem;color:var(--sub);padding:6px 8px;">${s.remark||'--'}</td></tr>`;}).join('');
+    detailHtml+=`<div style="margin-bottom:14px;"><div style="font-family:'Baloo 2',cursive;font-size:0.88rem;font-weight:800;margin-bottom:6px;color:var(--text);">${g.title}</div><table style="width:100%;font-size:0.8rem;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:5px 8px;background:var(--bg);font-size:0.65rem;color:var(--sub);">Aytem</th><th style="padding:5px 8px;background:var(--bg);font-size:0.65rem;color:var(--sub);">Status</th><th style="text-align:left;padding:5px 8px;background:var(--bg);font-size:0.65rem;color:var(--sub);">Remarks</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  });
+  document.getElementById('viewInspBody').innerHTML=banner+`<div style="font-size:0.8rem;margin-bottom:12px;color:var(--sub);"><strong>Inspector:</strong> ${x.inspector||'--'} &nbsp;|&nbsp; <strong>Adviser:</strong> ${x.adviser||'--'} &nbsp;|&nbsp; <strong>Pass:</strong> ${x.pass} &nbsp;|&nbsp; <strong>Fail:</strong> ${x.fail}</div>`+detailHtml+(x.remarks?`<div style="background:var(--bg);border-radius:10px;padding:10px 14px;font-size:0.8rem;margin-top:8px;"><strong>📝 Remarks:</strong> ${x.remarks}</div>`:'');
+  document.getElementById('viewInspModal').classList.add('show');
+}
+function renderReports(){
+  const byMonth={};
+  records.forEach(r=>{const m=r.date.slice(0,7);if(!byMonth[m])byMonth[m]={green:0,blue:0,yellow:0,red:0};byMonth[m].green+=r.green;byMonth[m].blue+=r.blue;byMonth[m].yellow+=r.yellow;byMonth[m].red+=r.red;});
+  const mkeys=Object.keys(byMonth).sort();const maxM=Math.max(...mkeys.map(k=>byMonth[k].green+byMonth[k].blue+byMonth[k].yellow+byMonth[k].red),0.1);
+  document.getElementById('monthlyChart').innerHTML=!mkeys.length?'<div class="empty"><div class="ei">📊</div><p>No data available.</p></div>':mkeys.map(m=>{const v=byMonth[m];const total=v.green+v.blue+v.yellow+v.red;const[yr,mo]=m.split('-');const label=new Date(yr,mo-1).toLocaleDateString('en-PH',{month:'short',year:'2-digit'});return`<div class="chart-row"><div class="chart-label">${label}</div><div class="chart-bar-bg"><div class="chart-bar green" style="width:${Math.round(total/maxM*100)}%">${total>0.5?total.toFixed(1)+'kg':''}</div></div><div class="chart-val">${total.toFixed(1)}<span style="font-size:0.6rem;color:var(--sub);">kg</span></div></div>`;}).join('');
+  const byS={};records.forEach(r=>{const k=`${r.grade}|${r.section}`;if(!byS[k])byS[k]=0;byS[k]+=r.green+r.blue+r.yellow+r.red;});
+  const top=Object.entries(byS).sort((a,b)=>b[1]-a[1]).slice(0,6);const maxS=top[0]?top[0][1]:0.1;
+  document.getElementById('topSections').innerHTML=!top.length?'<div class="empty"><div class="ei">🏆</div><p>No data available.</p></div>':top.map(([key,val],i)=>{const[grade,sec]=key.split('|');return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;"><div style="width:22px;height:22px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;flex-shrink:0;">${i+1}</div><div style="flex:1;"><div style="font-size:0.78rem;font-weight:800;">${sec} <span class="grade-chip" style="font-size:0.6rem;">${grade}</span></div><div style="background:var(--bg);border-radius:99px;height:7px;overflow:hidden;margin-top:3px;"><div style="height:100%;width:${Math.round(val/maxS*100)}%;background:var(--green-l);border-radius:99px;"></div></div></div><div style="font-size:0.76rem;font-weight:800;color:var(--green);width:55px;text-align:right;">${val.toFixed(1)} kg</div></div>`;}).join('');
+  const secInspMap={};
+  inspections.forEach(x=>{const k=`${x.grade}|${x.section}`;if(!secInspMap[k])secInspMap[k]={pass:0,total:0};secInspMap[k].total++;if(x.result==='Compliant')secInspMap[k].pass++;});
+  const compEntries=Object.entries(secInspMap).sort((a,b)=>b[1].pass/b[1].total-a[1].pass/a[1].total);
+  document.getElementById('complianceChart').innerHTML=!compEntries.length?'<div class="empty"><div class="ei">🔍</div><p>No inspection data.</p></div>':compEntries.map(([key,v])=>{const[grade,sec]=key.split('|');const pct=Math.round(v.pass/v.total*100);const color=pct>=80?'var(--green)':pct>=60?'var(--yellow)':'var(--red)';return`<div class="chart-row"><div class="chart-label">${sec} <span style="font-size:0.65rem;font-weight:700;color:var(--sub);">${grade}</span></div><div class="chart-bar-bg"><div class="chart-bar" style="width:${pct}%;background:linear-gradient(90deg,${color},${color}99);color:white;">${pct>=15?pct+'%':''}</div></div><div class="chart-val" style="color:${color};">${pct}%</div></div>`;}).join('');
+  const failCounts={};
+  CHECKLIST.forEach(g=>g.items.forEach(it=>{failCounts[it.id]={text:it.text,count:0};}));
+  inspections.forEach(x=>{Object.entries(x.items||{}).forEach(([id,v])=>{if(v.v==='fail'&&failCounts[id])failCounts[id].count++;});});
+  const topFail=Object.values(failCounts).sort((a,b)=>b.count-a.count).filter(x=>x.count>0).slice(0,6);
+  const maxF=topFail[0]?topFail[0].count:1;
+  document.getElementById('failItems').innerHTML=!topFail.length?'<div class="empty"><div class="ei">✅</div><p>No failed items yet.</p></div>':topFail.map(f=>`<div style="margin-bottom:10px;"><div style="font-size:0.76rem;font-weight:700;margin-bottom:3px;">${f.text}</div><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;background:var(--bg);border-radius:99px;height:8px;overflow:hidden;"><div style="height:100%;width:${Math.round(f.count/maxF*100)}%;background:var(--red-l);border-radius:99px;"></div></div><span style="font-size:0.72rem;font-weight:800;color:var(--red);flex-shrink:0;">${f.count}x</span></div></div>`).join('');
+  const total=records.reduce((s,r)=>s+r.green+r.blue+r.yellow+r.red,0);
+  const compRate=inspections.length?Math.round(inspections.filter(x=>x.result==='Compliant').length/inspections.length*100):0;
+  document.getElementById('summaryStats').innerHTML=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;"><div style="text-align:center;padding:16px;background:var(--green-bg);border-radius:12px;"><div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--green);">${records.length}</div><div style="font-size:0.68rem;color:var(--sub);font-weight:700;">Waste Records</div></div><div style="text-align:center;padding:16px;background:var(--blue-bg);border-radius:12px;"><div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--blue);">${total.toFixed(1)}</div><div style="font-size:0.68rem;color:var(--sub);font-weight:700;">Totalg kg</div></div><div style="text-align:center;padding:16px;background:var(--teal-bg);border-radius:12px;"><div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--teal);">${inspections.length}</div><div style="font-size:0.68rem;color:var(--sub);font-weight:700;">Inspections</div></div><div style="text-align:center;padding:16px;background:var(--green-bg);border-radius:12px;"><div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--green);">${compRate}%</div><div style="font-size:0.68rem;color:var(--sub);font-weight:700;">Compliance Rate</div></div></div>`;
+}
+function exportCSV(){const rows=[['Date','Grade','Section','Adviser','Bio(kg)','NonBio(kg)','Recycle(kg)','Hazardous(kg)','Total(kg)','Notes']];records.forEach(r=>rows.push([r.date,r.grade||'',r.section,r.teacher||'',r.green,r.blue,r.yellow,r.red,(r.green+r.blue+r.yellow+r.red).toFixed(1),r.notes||'']));const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download='waste_records_'+new Date().toISOString().slice(0,10)+'.csv';a.click();showToast('⬇️ Exported successfully!');}
+function exportInspCSV(){const rows=[['Date','Grade','Section','Adviser','Inspector','Pass','Fail','Score(%)','Result','Remarks']];inspections.forEach(x=>rows.push([x.date,x.grade||'',x.section,x.adviser||'',x.inspector||'',x.pass,x.fail,x.pct,x.result,x.remarks||'']));const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download='inspection_logs_'+new Date().toISOString().slice(0,10)+'.csv';a.click();showToast('⬇️ Inspections exported!');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2700);}
+const ACCOUNTS_KEY = 'deped_accounts_v1';
+function loadAccounts(){
+  try{
+    const saved = _getItem(ACCOUNTS_KEY);
+    if(saved){ const a=JSON.parse(saved); if(a&&a.length) return a; }
+  }catch(e){}
+  return [
+    {username:'admin',   password:'admin123',   role:'Administrator', label:'👑 Admin'},
+    {username:'teacher', password:'teacher123', role:'Teacher',       label:'👩‍🏫 Teacher'},
+    {username:'viewer',  password:'viewer123',  role:'Viewer',        label:'👁️ Viewer'},
+  ];
+}
+let ACCOUNTS = loadAccounts();
+function saveAccounts(){ _setItem(ACCOUNTS_KEY, JSON.stringify(ACCOUNTS)); }
+function toggleLoginPass(btn){
+  const inp=document.getElementById('loginPass');
+  const isText=inp.type==='text';
+  inp.type=isText?'password':'text';
+  btn.textContent=isText?'👁':'🙈';
+}
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const errEl=document.getElementById('loginError');
+  const btn=document.getElementById('loginBtn');
+  errEl.classList.remove('show');
+  if(!u||!p){
+    document.getElementById('loginErrorMsg').textContent='Please enter your username and password.';
+    errEl.classList.add('show');return;
+  }
+  btn.disabled=true;btn.textContent='⏳ Signing in...';
+  setTimeout(()=>{
+    const acc=ACCOUNTS.find(a=>a.username===u&&a.password===p);
+    if(!acc){
+      document.getElementById('loginErrorMsg').textContent='Invalid username or password. Please try again.';
+      errEl.classList.add('show');
+      btn.disabled=false;btn.textContent='🔐 Sign In';
+    }else{
+      window._wasteUser = acc;
+      document.getElementById('userBadge').textContent=acc.label;
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('appLayout').style.display='flex';
+      document.getElementById('navUserMgmt').style.display=acc.role==='Administrator'?'flex':'none';
+      document.getElementById('navReportSettings').style.display=acc.role==='Administrator'?'flex':'none';
+      renderDashboard();
+    }
+  },500);
+}
+function doLogout(){
+  window._wasteUser = null;
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('loginBtn').disabled=false;
+  document.getElementById('loginBtn').textContent='🔐 Sign In';
+  document.getElementById('appLayout').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  showPage('dashboard');
+}
+(function loadPatulLogo(){
+  try{
+    const raw=_getItem('ph_scheduler_v2');
+    if(raw){
+      const data=JSON.parse(raw);
+      const img=data?.settings?.logoLeftImg||data?.settings?.logoRightImg;
+      if(img){
+        document.getElementById('loginLogo').src=img;
+        document.getElementById('sidebarLogo').src=img;
+      }
+    }
+  }catch(e){}
+})();
+(function init(){
+  const saved=window._wasteUser;
+  if(saved&&saved.username){
+    try{
+      const acc=saved;
+      document.getElementById('userBadge').textContent=acc.label;
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('appLayout').style.display='flex';
+      document.getElementById('navUserMgmt').style.display=acc.role==='Administrator'?'flex':'none';
+      document.getElementById('navReportSettings').style.display=acc.role==='Administrator'?'flex':'none';
+      renderDashboard();
+    }catch(e){}
+  }
+  setTimeout(()=>{
+    if(document.getElementById('loginScreen').style.display!=='none'){
+      document.getElementById('loginUser').focus();
+    }
+  },100);
+})();
+
+/* ══════════════════════════════════════════════
+   REPORT TAB SWITCHER
+══════════════════════════════════════════════ */
+function switchReportTab(tab){
+  ['analytics','print','cert'].forEach(t=>{
+    document.getElementById('rtab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('rtab-content-'+t).style.display=t===tab?'block':'none';
+  });
+  if(tab==='analytics') renderReports();
+  if(tab==='print'){updateReportDateInputs();populateRptSection();}
+}
+function populateRptSection(){
+  const sel=document.getElementById('rpt_section');
+  if(!sel)return;
+  const prev=sel.value;
+  sel.innerHTML='<option value="">All Sections</option>'+sections.map(s=>`<option value="${s.name}">${s.grade} - ${s.name}</option>`).join('');
+  sel.value=prev;
+}
+function updateReportDateInputs(){
+  const type=document.getElementById('rpt_type').value;
+  document.getElementById('rpt_date_wrap').style.display=type==='daily'?'block':'none';
+  document.getElementById('rpt_week_wrap').style.display=type==='weekly'?'block':'none';
+  document.getElementById('rpt_month_wrap').style.display=type==='monthly'?'block':'none';
+  document.getElementById('rpt_year_wrap').style.display=type==='yearly'?'block':'none';
+}
+function getReportDateRange(){
+  const type=document.getElementById('rpt_type').value;
+  let label='',start='',end='';
+  const today=new Date().toISOString().slice(0,10);
+  if(type==='daily'){
+    const d=document.getElementById('rpt_date').value||today;
+    start=d;end=d;
+    label='Daily Report -- '+fmtDate(d);
+  } else if(type==='weekly'){
+    const ws=document.getElementById('rpt_week').value||today;
+    const wsD=new Date(ws);
+    const weD=new Date(wsD);weD.setDate(wsD.getDate()+6);
+    start=ws;end=weD.toISOString().slice(0,10);
+    label='Weekly Report -- '+fmtDate(start)+' to '+fmtDate(end);
+  } else if(type==='monthly'){
+    const m=document.getElementById('rpt_month').value||(today.slice(0,7));
+    const[yr,mo]=m.split('-');
+    start=`${yr}-${mo}-01`;
+    const lastDay=new Date(yr,mo,0).getDate();
+    end=`${yr}-${mo}-${String(lastDay).padStart(2,'0')}`;
+    label='Monthly Report -- '+new Date(yr,mo-1).toLocaleDateString('en-PH',{month:'long',year:'numeric'});
+  } else {
+    const yr=document.getElementById('rpt_year').value||new Date().getFullYear();
+    start=`${yr}-01-01`;end=`${yr}-12-31`;
+    label=`Yearly Report -- ${yr}`;
+  }
+  return{label,start,end};
+}
+function generatePrintReport(){
+  populateRptSection();
+  const{label,start,end}=getReportDateRange();
+  const gradeFil=document.getElementById('rpt_grade').value;
+  const secFil=document.getElementById('rpt_section').value;
+  let recs=records.filter(r=>r.date>=start&&r.date<=end);
+  let insps=inspections.filter(x=>x.date>=start&&x.date<=end);
+  if(gradeFil){recs=recs.filter(r=>r.grade===gradeFil);insps=insps.filter(x=>x.grade===gradeFil);}
+  if(secFil){recs=recs.filter(r=>r.section===secFil);insps=insps.filter(x=>x.section===secFil);}
+  const totG=recs.reduce((s,r)=>s+r.green,0),totB=recs.reduce((s,r)=>s+r.blue,0),totY=recs.reduce((s,r)=>s+r.yellow,0),totR=recs.reduce((s,r)=>s+r.red,0);
+  const total=totG+totB+totY+totR;
+  const compPct=insps.length?Math.round(insps.filter(x=>x.result==='Compliant').length/insps.length*100):0;
+  const printedOn=new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const logoSrc = document.getElementById('sidebarLogo')?.src || document.getElementById('loginLogo')?.src || '';
+  const rs = loadRS();
+  const html=`<div class="print-report" id="printReportDoc">
+    <div class="print-report-header">
+      <div style="text-align:center;margin-bottom:12px;">
+        <img src="${logoSrc}"
+          style="width:80px;height:80px;object-fit:contain;border-radius:50%;border:2.5px solid rgba(46,125,50,0.35);box-shadow:0 4px 16px rgba(46,125,50,0.15);display:block;margin:0 auto 10px;" alt="School Logo"/>
+        <h1 style="margin:0 0 2px;">${rs.schoolName||'Patul National High School'}</h1>
+        <div style="font-size:0.7rem;color:var(--sub);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:2px;">${rs.address||'Tuguegarao City, Cagayan Valley'} · DepEd Philippines</div>
+        ${rs.contact||rs.email?`<div style="font-size:0.68rem;color:var(--sub);font-weight:600;margin-bottom:4px;">${rs.contact?rs.contact+'  ':''}${rs.email||''}</div>`:''}
+        <h2 style="margin:0 0 4px;">Waste Segregation Record System</h2>
+        <div style="font-size:0.72rem;color:var(--sub);font-weight:700;">${rs.schoolYear||''} &nbsp;·&nbsp; ${rs.semester||''}</div>
+      </div>
+      <div class="rpt-period">${label}</div>
+      <div class="rpt-meta">Generated: ${printedOn}${gradeFil?' | Grade: '+gradeFil:''}${secFil?' | Section: '+secFil:''}</div>
+    </div>
+
+    <div class="rpt-section-title">📊 Summary Statistics</div>
+    <div class="rpt-summary-grid">
+      <div class="rpt-sum-card" style="background:var(--green-bg);">
+        <div class="num" style="color:var(--green);">${recs.length}</div>
+        <div class="lbl">Waste Records</div>
+      </div>
+      <div class="rpt-sum-card" style="background:var(--blue-bg);">
+        <div class="num" style="color:var(--blue);">${total.toFixed(1)} kg</div>
+        <div class="lbl">Total Waste</div>
+      </div>
+      <div class="rpt-sum-card" style="background:var(--teal-bg);">
+        <div class="num" style="color:var(--teal);">${insps.length}</div>
+        <div class="lbl">Inspections</div>
+      </div>
+      <div class="rpt-sum-card" style="background:var(--green-bg);">
+        <div class="num" style="color:var(--green);">${compPct}%</div>
+        <div class="lbl">Compliance Rate</div>
+      </div>
+    </div>
+
+    <div class="rpt-section-title">🗑️ Waste Breakdown</div>
+    <table class="rpt-table">
+      <thead><tr><th>Waste Type</th><th>Total (kg)</th><th>Percentage</th></tr></thead>
+      <tbody>
+        <tr><td>🟢 Biodegradable</td><td>${totG.toFixed(2)} kg</td><td>${total?Math.round(totG/total*100):0}%</td></tr>
+        <tr><td>🔵 Non-Biodegradable</td><td>${totB.toFixed(2)} kg</td><td>${total?Math.round(totB/total*100):0}%</td></tr>
+        <tr><td>🟡 Recyclable</td><td>${totY.toFixed(2)} kg</td><td>${total?Math.round(totY/total*100):0}%</td></tr>
+        <tr><td>🔴 Hazardous</td><td>${totR.toFixed(2)} kg</td><td>${total?Math.round(totR/total*100):0}%</td></tr>
+        <tr style="font-weight:800;"><td>📦 TOTAL</td><td>${total.toFixed(2)} kg</td><td>100%</td></tr>
+      </tbody>
+    </table>
+
+    ${recs.length>0?`
+    <div class="rpt-section-title">📋 Waste Records (${recs.length})</div>
+    <table class="rpt-table">
+      <thead><tr><th>Date</th><th>Grade</th><th>Section</th><th>Adviser</th><th>Bio(kg)</th><th>Non-Bio(kg)</th><th>Recycle(kg)</th><th>Hazard(kg)</th><th>Total</th></tr></thead>
+      <tbody>${recs.sort((a,b)=>a.date.localeCompare(b.date)).map(r=>`<tr><td>${fmtDate(r.date)}</td><td>${r.grade||'--'}</td><td>${r.section}</td><td>${r.teacher||'--'}</td><td>${r.green.toFixed(2)}</td><td>${r.blue.toFixed(2)}</td><td>${r.yellow.toFixed(2)}</td><td>${r.red.toFixed(2)}</td><td><strong>${(r.green+r.blue+r.yellow+r.red).toFixed(2)}</strong></td></tr>`).join('')}</tbody>
+    </table>`:''}
+
+    ${insps.length>0?`
+    <div class="rpt-section-title">🔍 Inspection Logs (${insps.length})</div>
+    <table class="rpt-table">
+      <thead><tr><th>Date</th><th>Grade</th><th>Section</th><th>Inspector</th><th>Score</th><th>Pass</th><th>Fail</th><th>Result</th></tr></thead>
+      <tbody>${insps.sort((a,b)=>a.date.localeCompare(b.date)).map(x=>`<tr><td>${fmtDate(x.date)}</td><td>${x.grade||'--'}</td><td>${x.section}</td><td>${x.inspector||'--'}</td><td><strong>${x.pct}%</strong></td><td>${x.pass}</td><td>${x.fail}</td><td>${x.result==='Compliant'?'✅':x.result==='Needs Improvement'?'⚠️':'❌'} ${x.result}</td></tr>`).join('')}</tbody>
+    </table>
+
+    <div class="rpt-section-title">📝 Inspection Checklist Details</div>
+    ${insps.sort((a,b)=>a.date.localeCompare(b.date)).map(x=>{
+      const allItems=CHECKLIST.flatMap(g=>g.items);
+      const passItems=allItems.filter(i=>x.items&&x.items[i.id]&&x.items[i.id].v==='pass');
+      const failItems=allItems.filter(i=>x.items&&x.items[i.id]&&x.items[i.id].v==='fail');
+      const naItems=allItems.filter(i=>!x.items||!x.items[i.id]||x.items[i.id].v===null);
+      const resultColor=x.result==='Compliant'?'#2e7d32':x.result==='Needs Improvement'?'#f57f17':'#c62828';
+      return `<div style="border:1.5px solid #e0e0e0;border-radius:10px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid;">
+        <div style="background:${resultColor};color:#fff;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-weight:800;font-size:0.82rem;">${x.section} (${x.grade}) -- ${fmtDate(x.date)}</div>
+          <div style="font-weight:800;font-size:0.82rem;">${x.pct}% | ${x.result}</div>
+        </div>
+        <div style="padding:10px 14px;">
+          <div style="font-size:0.72rem;color:var(--sub);font-weight:700;margin-bottom:6px;">Inspector: ${x.inspector||'--'} ${x.adviser?' | Adviser: '+x.adviser:''}</div>
+          ${CHECKLIST.map(grp=>{
+            const grpItems=grp.items;
+            const hasAny=grpItems.some(i=>x.items&&x.items[i.id]&&x.items[i.id].v!==null);
+            if(!hasAny)return '';
+            return `<div style="margin-bottom:8px;">
+              <div style="font-size:0.72rem;font-weight:800;color:#1b5e20;margin-bottom:4px;padding:3px 8px;background:#e8f5e9;border-radius:4px;">${grp.title}</div>
+              ${grpItems.map(item=>{
+                const v=x.items&&x.items[item.id]?x.items[item.id].v:null;
+                if(v===null)return '';
+                const icon=v==='pass'?'✅':'❌';
+                const color=v==='pass'?'#2e7d32':'#c62828';
+                return `<div style="display:flex;align-items:flex-start;gap:6px;padding:3px 0;font-size:0.72rem;border-bottom:1px solid #f5f5f5;">
+                  <span style="flex-shrink:0;">${icon}</span>
+                  <span style="color:${color};font-weight:700;">${item.text}</span>
+                </div>`;
+              }).join('')}
+            </div>`;
+          }).join('')}
+          ${x.remarks?`<div style="margin-top:8px;padding:6px 10px;background:#fff8e1;border-left:3px solid #ffca28;font-size:0.72rem;color:#555;font-style:italic;border-radius:0 4px 4px 0;">📝 ${x.remarks}</div>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+    `:''}
+
+    <div class="rpt-footer">
+      ${(rs.signatories&&rs.signatories.length?rs.signatories:[{title:'Prepared by',name:'',position:'Waste Management Coordinator'},{title:'Noted by',name:'',position:'School Principal'}]).map(s=>`
+      <div>
+        <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">${s.title}</div>
+        <div style="margin-bottom:36px;"></div>
+        <div class="rpt-sig-line">${s.name||'____________________'}</div>
+        <div class="rpt-sig-title">${s.position}</div>
+      </div>`).join('')}
+    </div>
+    <div style="text-align:center;font-size:0.6rem;color:var(--sub);margin-top:20px;padding-top:12px;border-top:1px solid var(--border);">
+      ${rs.schoolName||'Patul National High School'} · Waste Segregation Record System · DepEd Philippines · RA 9003
+    </div>
+  </div>`;
+  document.getElementById('printReportPreview').innerHTML=html;
+  showToast('✅ Report generated!');
+}
+function printReport(){
+  generatePrintReport();
+  setTimeout(()=>window.print(),300);
+}
+
+/* ══════════════════════════════════════════════
+   CERTIFICATE GENERATOR
+══════════════════════════════════════════════ */
+function updateCertFields(){
+  const type=document.getElementById('cert_type').value;
+  const noteEl=document.getElementById('cert_note');
+  const hints={
+    recognition:'e.g. For outstanding contribution to waste segregation',
+    compliance:'e.g. For achieving 100% compliance during inspection',
+    excellence:'e.g. For exemplary performance in waste management',
+    participation:'e.g. For active participation in the Waste Segregation Program',
+    topwaste:'e.g. For segregating the most recyclable waste this quarter'
+  };
+  noteEl.placeholder=hints[type]||'Additional note...';
+}
+function previewCert(){
+  const type=document.getElementById('cert_type').value;
+  const recipient=document.getElementById('cert_recipient').value.trim()||'[Recipient Name]';
+  const section=document.getElementById('cert_section').value.trim();
+  const adviser=document.getElementById('cert_adviser').value.trim();
+  const date=document.getElementById('cert_date').value||new Date().toISOString().slice(0,10);
+  const period=document.getElementById('cert_period').value.trim()||'S.Y. 2025-2026';
+  const awardedby=document.getElementById('cert_awardedby').value.trim()||'School Principal';
+  const note=document.getElementById('cert_note').value.trim();
+  const fmtD=d=>new Date(d+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+
+  const certData={
+    recognition:{
+      label:'Certificate of Recognition',
+      body:`This is to certify that`,
+      reason:`has shown outstanding dedication and excellence in the implementation of proper waste segregation practices, contributing significantly to the school's environmental conservation efforts.`,
+      emoji:'🥇',
+      ribbon:'Gold Awardee'
+    },
+    compliance:{
+      label:'Certificate of Compliance',
+      body:`This is to certify that`,
+      reason:`has successfully met all the requirements of the Waste Segregation Program and has been found fully compliant with DepEd's waste management standards during the period of inspection.`,
+      emoji:'✅',
+      ribbon:'Fully Compliant'
+    },
+    excellence:{
+      label:'Certificate of Excellence',
+      body:`In recognition of exemplary performance, this certificate is proudly awarded to`,
+      reason:`for demonstrating exceptional commitment to proper waste segregation, environmental awareness, and upholding the highest standards of cleanliness in the school community.`,
+      emoji:'⭐',
+      ribbon:'Excellence Award'
+    },
+    participation:{
+      label:'Certificate of Participation',
+      body:`This is to certify that`,
+      reason:`has actively and meaningfully participated in the Patul National High School Waste Segregation Program, helping to promote environmental consciousness and sustainable waste management practices.`,
+      emoji:'🤝',
+      ribbon:'Active Participant'
+    },
+    topwaste:{
+      label:'Top Waste Segregator Award',
+      body:`In recognition of outstanding achievement, this certificate is hereby awarded to`,
+      reason:`for being recognized as a top waste segregator -- demonstrating exemplary discipline, responsibility, and environmental stewardship through consistent and proper waste segregation practices.`,
+      emoji:'♻️',
+      ribbon:'Top Segregator'
+    }
+  };
+  const cd=certData[type];
+  const certLogoSrc = document.getElementById('sidebarLogo')?.src || document.getElementById('loginLogo')?.src || '';
+  const html=`<div class="cert-wrap" id="certDoc">
+    <div class="cert-outer">
+      <div class="cert-inner">
+        <div class="cert-watermark">♻️</div>
+        <div class="cert-logo-row">
+          ${certLogoSrc?`<img src="${certLogoSrc}" style="width:54px;height:54px;object-fit:contain;border-radius:50%;border:2px solid rgba(46,125,50,0.3);" alt="logo"/>`:``}
+          <span class="seal">${cd.emoji}</span>
+          <div>
+            <div class="cert-school">Patul National High School</div>
+            <div class="cert-sub-school">DepEd Philippines · Tuguegarao City, Cagayan Valley</div>
+          </div>
+        </div>
+        <div class="cert-divider"></div>
+        <div class="cert-type-label">This certificate is proudly presented</div>
+        <div class="cert-title">${cd.label}</div>
+        <div class="cert-body-text">${cd.body}</div>
+        <div class="cert-recipient">${recipient}</div>
+        <div class="cert-details">
+          ${section?`🎓 ${section}`:''} ${section&&adviser?'&nbsp;|&nbsp;':''} ${adviser?`👩‍🏫 Adviser: ${adviser}`:''}
+          ${period?`<br>📅 ${period}`:''}
+        </div>
+        ${note||cd.reason?`<div class="cert-reason">${note||cd.reason}</div>`:''}
+        <div class="cert-ribbon">${cd.ribbon}</div>
+        <div class="cert-sigs">
+          <div class="cert-sig">
+            <div style="margin-bottom:36px;"></div>
+            <div class="cert-sig-line">${adviser||'Adviser'}</div>
+            <div class="cert-sig-role">Class Adviser</div>
+          </div>
+          <div class="cert-sig">
+            <div style="margin-bottom:36px;"></div>
+            <div class="cert-sig-line">Waste Mgt. Coordinator</div>
+            <div class="cert-sig-role">Coordinator</div>
+          </div>
+          <div class="cert-sig">
+            <div style="margin-bottom:36px;"></div>
+            <div class="cert-sig-line">${awardedby}</div>
+            <div class="cert-sig-role">School Principal</div>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:0.65rem;color:var(--sub);margin-top:20px;">
+          Awarded on ${fmtD(date)} &nbsp;·&nbsp; Patul National High School &nbsp;·&nbsp; RA 9003
+        </div>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('certPreview').innerHTML=html;
+  showToast('✅ Certificate preview ready!');
+  document.getElementById('certPreview').scrollIntoView({behavior:'smooth'});
+}
+function printCert(){previewCert();setTimeout(()=>window.print(),300);}
+
+/* ══════════════════════════════════════════════
+   EMAIL NOTIFICATION
+══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   EMAIL NOTIFICATION -- EmailJS
+══════════════════════════════════════════════ */
+const EJS_KEY = 'patul_emailjs_config';
+let _emailInspData = null;
+
+function loadEmailjsConfig(){
+  try{ return JSON.parse(_getItem(EJS_KEY)||'{}'); }catch(e){ return {}; }
+}
+function saveEmailjsConfig(){
+  const cfg={
+    service: document.getElementById('ejs_service').value.trim(),
+    template: document.getElementById('ejs_template').value.trim(),
+    pubkey: document.getElementById('ejs_pubkey').value.trim()
+  };
+  if(!cfg.service||!cfg.template||!cfg.pubkey){showToast('❗ Kumpleto ng lahat ng fields.');return;}
+  _setItem(EJS_KEY, JSON.stringify(cfg));
+  document.getElementById('ejsSaveMsg').style.display='block';
+  updateEjsConfigStatus();
+  setTimeout(()=>document.getElementById('ejsSaveMsg').style.display='none',2500);
+  showToast('✅ EmailJS config saved!');
+}
+function updateEjsConfigStatus(){
+  const cfg=loadEmailjsConfig();
+  const ok=cfg.service&&cfg.template&&cfg.pubkey;
+  const el=document.getElementById('ejsConfigStatus');
+  if(el) el.innerHTML=ok?'<span style="color:var(--green);">✅ Configured</span>':'<span style="color:var(--red);">❌ Not set up</span>';
+  const banner=document.getElementById('emailjsSetupBanner');
+  if(banner) banner.style.display=ok?'none':'block';
+  // Load saved values into fields
+  if(cfg.service) document.getElementById('ejs_service').value=cfg.service;
+  if(cfg.template) document.getElementById('ejs_template').value=cfg.template;
+  if(cfg.pubkey) document.getElementById('ejs_pubkey').value=cfg.pubkey;
+}
+
+function sendInspectionEmail(){
+  const btn=document.getElementById('btnSendEmail');
+  const rec=btn._inspData;
+  if(!rec){showToast('❗ Save the inspection first.');return;}
+  _emailInspData=rec;
+  const secEmail=btn._secEmail||'';
+  document.getElementById('emailTo').value=secEmail;
+  const subject=`[Waste Inspection] ${rec.section} (${rec.grade}) -- ${rec.result} (${rec.pct}%) -- ${fmtDate(rec.date)}`;
+  document.getElementById('emailSubject').value=subject;
+
+  // Build checklist lines
+  let passItems=[],failItems=[];
+  if(rec.items){
+    Object.entries(rec.items).forEach(([id,v])=>{
+      const found=CHECKLIST.flatMap(g=>g.items).find(i=>i.id===id);
+      if(found){if(v.v==='pass')passItems.push(found.text);else if(v.v==='fail')failItems.push(found.text);}
+    });
+  }
+  const checkLines=(passItems.length?'\n✅ PASSED ITEMS:\n'+passItems.map(t=>`  * ${t}`).join('\n'):'')+
+                   (failItems.length?'\n\n❌ FAILED ITEMS:\n'+failItems.map(t=>`  * ${t}`).join('\n'):'');
+
+  const body=`Dear ${rec.adviser||'Adviser'},
+
+This is to notify you that an inspection has been conducted for your class.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INSPECTION RESULT SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Section   : ${rec.section}
+Grade     : ${rec.grade}
+Date      : ${fmtDate(rec.date)}
+Inspector : ${rec.inspector||'--'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Score     : ${rec.pct}%
+Result    : ${rec.result==='Compliant'?'✅ COMPLIANT':rec.result==='Needs Improvement'?'⚠️ NEEDS IMPROVEMENT':'❌ NON-COMPLIANT'}
+Passed    : ${rec.pass} items
+Failed    : ${rec.fail} items
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${checkLines}
+
+${rec.remarks?`Inspector's Remarks:\n"${rec.remarks}"\n`:''}
+${rec.result!=='Compliant'?'Please address the failed items as soon as possible to improve your section\'s compliance.\n':'Congratulations! Your section has passed the inspection.\n'}
+This is an automated notification from the Patul NHS Waste Segregation System.
+
+-- Waste Management Coordinator
+Patul National High School`;
+
+  document.getElementById('emailPreviewText').textContent=body;
+  document.getElementById('emailStatus').className='email-status';
+  document.getElementById('emailModal').classList.add('show');
+  updateEjsConfigStatus();
+}
+
+async function actuallySendEmail(){
+  const to=document.getElementById('emailTo').value.trim();
+  const subject=document.getElementById('emailSubject').value.trim();
+  const body=document.getElementById('emailPreviewText').textContent;
+  const cfg=loadEmailjsConfig();
+
+  if(!to){showToast('❗ Ilagay ang email address ng adviser.');return;}
+  if(!cfg.service||!cfg.template||!cfg.pubkey){
+    showToast('❗ I-setup muna ang EmailJS config.');
+    document.getElementById('emailjsCredDetails').open=true;
+    return;
+  }
+
+  const btn=document.getElementById('btnActuallySend');
+  const btnTxt=document.getElementById('sendBtnText');
+  btn.disabled=true;
+  btnTxt.textContent='⏳ Sending...';
+
+  try{
+    emailjs.init(cfg.pubkey);
+    await emailjs.send(cfg.service, cfg.template, {
+      to_email:   to,
+      to_name:    _emailInspData?.adviser || 'Adviser',
+      subject:    subject,
+      message:    body,
+      from_name:  'Patul NHS Waste Segregation System',
+      section:    _emailInspData?.section||'',
+      grade:      _emailInspData?.grade||'',
+      result:     _emailInspData?.result||'',
+      score:      (_emailInspData?.pct||0)+'%',
+      date:       fmtDate(_emailInspData?.date||''),
+      inspector:  _emailInspData?.inspector||'--',
+    });
+    const statusEl=document.getElementById('emailStatus');
+    statusEl.textContent='✅ Email sent successfully to '+to+'!';
+    statusEl.className='email-status success';
+    showToast('📧 Email sent kay '+(_emailInspData?.adviser||'Adviser')+'!');
+    btn.disabled=false;
+    btnTxt.textContent='📤 I-Send ang Email';
+  } catch(err){
+    const statusEl=document.getElementById('emailStatus');
+    statusEl.textContent='❌ Hindi na-send: '+(err?.text||err?.message||JSON.stringify(err))+'. Tingnan ang EmailJS config.';
+    statusEl.className='email-status';
+    statusEl.style.display='block';
+    statusEl.style.background='var(--red-bg)';
+    statusEl.style.color='var(--red)';
+    btn.disabled=false;
+    btnTxt.textContent='📤 I-Send ang Email';
+    showToast('❌ Email failed. Check EmailJS config.');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   USER MANAGEMENT
+══════════════════════════════════════════════ */
+function autoFillUmLabel(){
+  const role=document.getElementById('umRole').value;
+  const lbl=document.getElementById('umLabel');
+  if(!lbl.value||lbl.value==='👑 Admin'||lbl.value==='👩‍🏫 Teacher'||lbl.value==='👁️ Viewer'){
+    if(role==='Administrator') lbl.value='👑 Admin';
+    else if(role==='Teacher') lbl.value='👩‍🏫 Teacher';
+    else lbl.value='👁️ Viewer';
+  }
+}
+function resetUmForm(){
+  document.getElementById('umFormTitle').textContent='➕ Add New User';
+  document.getElementById('umUsername').value='';
+  document.getElementById('umUsername').disabled=false;
+  document.getElementById('umPassword').value='';
+  document.getElementById('umRole').value='Teacher';
+  document.getElementById('umLabel').value='';
+  document.getElementById('umEditIndex').value='-1';
+  document.getElementById('umInlineError').style.display='none';
+  document.getElementById('umCancelBtn').style.display='none';
+}
+function renderUserTable(){
+  const tbody=document.getElementById('userTableBody');
+  if(!tbody) return;
+  const currentUser=window._wasteUser;
+  const countEl=document.getElementById('userCountBadge');
+  if(countEl) countEl.textContent=ACCOUNTS.length+' account'+(ACCOUNTS.length!==1?'s':'');
+  const emptyEl=document.getElementById('emptyUsers');
+  if(!ACCOUNTS.length){tbody.innerHTML='';if(emptyEl)emptyEl.style.display='block';return;}
+  if(emptyEl)emptyEl.style.display='none';
+  tbody.innerHTML=ACCOUNTS.map((a,i)=>{
+    const roleBadge=a.role==='Administrator'?'badge-red':a.role==='Teacher'?'badge-green':'badge-blue';
+    const roleIcon=a.role==='Administrator'?'👑':a.role==='Teacher'?'👩‍🏫':'👁️';
+    const isMe=currentUser&&currentUser.username===a.username;
+    return`<tr>
+      <td style="color:var(--sub);font-weight:800;font-size:0.85rem;">${i+1}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:34px;height:34px;border-radius:10px;background:${a.role==='Administrator'?'rgba(198,40,40,0.12)':a.role==='Teacher'?'rgba(46,125,50,0.12)':'rgba(21,101,192,0.12)'};display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">${roleIcon}</div>
+          <div>
+            <div style="font-weight:800;font-size:0.88rem;">${a.username}</div>
+            ${isMe?'<span class="badge badge-green" style="font-size:0.58rem;">● You</span>':''}
+          </div>
+        </div>
+      </td>
+      <td style="font-weight:700;font-size:0.85rem;">${a.label}</td>
+      <td><span class="badge ${roleBadge}">${a.role}</span></td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-edit btn-sm" onclick="editUserInline(${i})">✏️ Edit</button>
+          ${isMe?'<span style="font-size:0.7rem;color:var(--sub);align-self:center;padding:0 6px;">Current user</span>':'<button class="btn btn-danger btn-sm" onclick="deleteUser('+i+')">🗑️ Del</button>'}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function editUserInline(i){
+  const a=ACCOUNTS[i];
+  document.getElementById('umFormTitle').textContent='✏️ Edit User: '+a.username;
+  document.getElementById('umUsername').value=a.username;
+  document.getElementById('umUsername').disabled=true;
+  document.getElementById('umPassword').value=a.password;
+  document.getElementById('umRole').value=a.role;
+  document.getElementById('umLabel').value=a.label;
+  document.getElementById('umEditIndex').value=i;
+  document.getElementById('umInlineError').style.display='none';
+  document.getElementById('umCancelBtn').style.display='inline-flex';
+  // Scroll to form
+  document.getElementById('page-usermgmt').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function openAddUserModal(){ resetUmForm(); }
+function openEditUserModal(i){ editUserInline(i); }
+function toggleUmPass(btn){
+  const inp=document.getElementById('umPassword');
+  const isText=inp.type==='text';
+  inp.type=isText?'password':'text';
+  btn.textContent=isText?'👁':'🙈';
+}
+function saveUser(){
+  const idx=parseInt(document.getElementById('umEditIndex').value);
+  const username=document.getElementById('umUsername').value.trim();
+  const password=document.getElementById('umPassword').value;
+  const role=document.getElementById('umRole').value;
+  const label=document.getElementById('umLabel').value.trim();
+  const errEl=document.getElementById('umInlineError');
+  errEl.style.display='none';
+  if(!username||!password||!label){
+    errEl.textContent='❗ Kumpletuhin ang lahat ng fields.';errEl.style.display='block';return;
+  }
+  if(password.length<4){
+    errEl.textContent='❗ Minimum 4 characters ang password.';errEl.style.display='block';return;
+  }
+  if(idx===-1){
+    if(ACCOUNTS.find(a=>a.username===username)){
+      errEl.textContent='❗ Mayroon nang account na may ganoong username.';errEl.style.display='block';return;
+    }
+    ACCOUNTS.push({username,password,role,label});
+    showToast('✅ User added: '+username);
+  }else{
+    ACCOUNTS[idx]={...ACCOUNTS[idx],password,role,label};
+    showToast('✅ User updated: '+username);
+  }
+  saveAccounts();
+  renderUserTable();
+  resetUmForm();
+}
+function deleteUser(i){
+  const a=ACCOUNTS[i];
+  if(!confirm('Delete user "'+a.username+'"? Hindi na ito mababalik.')) return;
+  ACCOUNTS.splice(i,1);
+  saveAccounts();
+  renderUserTable();
+  resetUmForm();
+  showToast('🗑️ User deleted: '+a.username);
+}
+/* ══════════════════════════════════════════════
+   REPORT SETTINGS
+══════════════════════════════════════════════ */
+const RS_KEY = 'deped_report_settings_v1';
+const RS_DEFAULT = {
+  schoolName: 'Patul National High School',
+  address: 'Brgy. Maligaya, Cabanatuan City, Nueva Ecija',
+  contact: '(044) 123-4567',
+  email: 'patul.nhs@deped.gov.ph',
+  website: 'www.patulnhs.edu.ph',
+  schoolYear: '2025-2026',
+  semester: '1st Quarter',
+  signatories: [
+    {title:'Prepared by:', name:'Maria T. Santos', position:'Registrar'},
+    {title:'Checked by:', name:'Jose R. Reyes', position:'Academic Coordinator'},
+    {title:'Noted by:', name:'Ana P. Cruz', position:'School Principal'},
+  ]
+};
+function loadRS(){
+  try{ const s=_getItem(RS_KEY); return s?JSON.parse(s):RS_DEFAULT; }catch(e){ return RS_DEFAULT; }
+}
+function saveReportSettings(){
+  const rs={
+    schoolName: document.getElementById('rs_schoolName').value.trim()||RS_DEFAULT.schoolName,
+    address:    document.getElementById('rs_address').value.trim(),
+    contact:    document.getElementById('rs_contact').value.trim(),
+    email:      document.getElementById('rs_email').value.trim(),
+    website:    document.getElementById('rs_website').value.trim(),
+    schoolYear: document.getElementById('rs_schoolYear').value.trim()||RS_DEFAULT.schoolYear,
+    semester:   document.getElementById('rs_semester').value.trim()||RS_DEFAULT.semester,
+    signatories: window._rsSignatories||[],
+  };
+  _setItem(RS_KEY, JSON.stringify(rs));
+  showToast('✅ Report settings saved!');
+}
+function initReportSettings(){
+  const rs=loadRS();
+  window._rsSignatories=[...(rs.signatories||[])];
+  document.getElementById('rs_schoolName').value=rs.schoolName||'';
+  document.getElementById('rs_address').value=rs.address||'';
+  document.getElementById('rs_contact').value=rs.contact||'';
+  document.getElementById('rs_email').value=rs.email||'';
+  document.getElementById('rs_website').value=rs.website||'';
+  document.getElementById('rs_schoolYear').value=rs.schoolYear||RS_DEFAULT.schoolYear;
+  document.getElementById('rs_semester').value=rs.semester||RS_DEFAULT.semester;
+  // Update logo preview
+  const logoEl=document.getElementById('rs_logoPreview');
+  if(logoEl){
+    const src=document.getElementById('sidebarLogo')?.src||document.getElementById('loginLogo')?.src||'';
+    logoEl.src=src;
+  }
+  // Chip highlights
+  setSyChip(rs.schoolYear||RS_DEFAULT.schoolYear);
+  setSemChip(rs.semester||RS_DEFAULT.semester);
+  renderSignatoryTable();
+}
+function selectSY(val){
+  document.getElementById('rs_schoolYear').value=val;
+  setSyChip(val);
+}
+function setSyChip(val){
+  document.querySelectorAll('#rs_syBtns .rs-chip').forEach(b=>{
+    b.classList.toggle('rs-chip-active',b.textContent===val);
+  });
+}
+function selectSem(val){
+  document.getElementById('rs_semester').value=val;
+  setSemChip(val);
+}
+function setSemChip(val){
+  document.querySelectorAll('#rs_semBtns .rs-chip').forEach(b=>{
+    b.classList.toggle('rs-chip-active', b.textContent===val);
+  });
+}
+// ── Signatories ──
+const SIG_TITLE_COLORS = ['#f57f17','#e65100','#558b2f','#1565c0','#6a1b9a','#00695c'];
+function renderSignatoryTable(){
+  const sigs=window._rsSignatories||[];
+  const tbody=document.getElementById('signatoryBody');
+  const empty=document.getElementById('emptySig');
+  if(!sigs.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=sigs.map((s,i)=>{
+    const col=SIG_TITLE_COLORS[i%SIG_TITLE_COLORS.length];
+    return`<tr>
+      <td style="color:var(--sub);font-weight:800;font-size:0.85rem;">${i+1}</td>
+      <td style="color:${col};font-weight:800;font-size:0.82rem;">${s.title}</td>
+      <td style="font-weight:800;">${s.name}</td>
+      <td style="color:var(--sub);font-weight:600;">${s.position}</td>
+      <td><div style="display:flex;gap:6px;">
+        <button class="btn btn-edit btn-sm" onclick="editSignatory(${i})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSignatory(${i})">Del</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function openAddSignatory(){
+  document.getElementById('sigFormTitle').textContent='➕ Add Signatory';
+  document.getElementById('sig_title').value='';
+  document.getElementById('sig_name').value='';
+  document.getElementById('sig_position').value='';
+  document.getElementById('sig_editIdx').value='-1';
+  document.getElementById('sigForm').style.display='block';
+  document.getElementById('sigForm').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function editSignatory(i){
+  const s=(window._rsSignatories||[])[i];
+  if(!s)return;
+  document.getElementById('sigFormTitle').textContent='✏️ Edit Signatory';
+  document.getElementById('sig_title').value=s.title;
+  document.getElementById('sig_name').value=s.name;
+  document.getElementById('sig_position').value=s.position;
+  document.getElementById('sig_editIdx').value=i;
+  document.getElementById('sigForm').style.display='block';
+  document.getElementById('sigForm').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function saveSignatory(){
+  const title=document.getElementById('sig_title').value.trim();
+  const name=document.getElementById('sig_name').value.trim();
+  const position=document.getElementById('sig_position').value.trim();
+  if(!title||!name){showToast('❗ Kumpletuhin ang Title at Name.');return;}
+  const idx=parseInt(document.getElementById('sig_editIdx').value);
+  if(!window._rsSignatories) window._rsSignatories=[];
+  if(idx===-1){ window._rsSignatories.push({title,name,position}); }
+  else{ window._rsSignatories[idx]={title,name,position}; }
+  renderSignatoryTable();
+  closeSigForm();
+  showToast(idx===-1?'✅ Signatory added!':'✅ Signatory updated!');
+}
+function deleteSignatory(i){
+  if(!confirm('Delete this signatory?')) return;
+  window._rsSignatories.splice(i,1);
+  renderSignatoryTable();
+  showToast('🗑️ Signatory deleted.');
+}
+function closeSigForm(){
+  document.getElementById('sigForm').style.display='none';
+}
+</script>
+</body>
+</html>
