@@ -656,7 +656,31 @@ tbody td{padding:10px 14px;font-weight:600;vertical-align:middle;}
 </head>
 <body>
 
-<!-- ══ LOGIN SCREEN ══ -->
+<!-- ══ FIREBASE LOADING OVERLAY ══ -->
+<div id="fbLoadingOverlay" style="
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(135deg,#e8f5e9,#f1f8e9,#e0f2f1);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Nunito',sans-serif;
+">
+  <div style="text-align:center;">
+    <div style="font-size:3.5rem;margin-bottom:16px;animation:spin 1.5s linear infinite;display:inline-block;">♻️</div>
+    <div style="font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800;color:#1b5e20;margin-bottom:8px;">Naglo-load...</div>
+    <div style="font-size:0.8rem;color:#558b2f;font-weight:600;">Kinokonekta sa Firebase database</div>
+    <div style="margin-top:20px;width:200px;height:4px;background:#c8e6c9;border-radius:99px;overflow:hidden;">
+      <div style="height:100%;background:linear-gradient(90deg,#2e7d32,#66bb6a);border-radius:99px;animation:loadbar 1.5s ease-in-out infinite;"></div>
+    </div>
+  </div>
+</div>
+<style>
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes loadbar { 0%{width:0%;margin-left:0} 50%{width:100%;margin-left:0} 100%{width:0%;margin-left:100%} }
+</style>
+<script>
+function showLoadingOverlay(show) {
+  document.getElementById('fbLoadingOverlay').style.display = show ? 'flex' : 'none';
+}
+</script>
 <div id="loginScreen">
   <div class="login-card">
     <!-- Logo -->
@@ -1449,23 +1473,128 @@ tbody td{padding:10px 14px;font-weight:600;vertical-align:middle;}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, getDocs, addDoc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDf4sGTh-cyprTNu_-gffZgh2QjKXMiPU8",
+  authDomain: "wastesegregation-84a85.firebaseapp.com",
+  projectId: "wastesegregation-84a85",
+  storageBucket: "wastesegregation-84a85.firebasestorage.app",
+  messagingSenderId: "879499719308",
+  appId: "1:879499719308:web:23856a5fcdf308b7ab81a9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window._db = db;
+window._fbModules = { collection, doc, getDocs, addDoc, setDoc, deleteDoc, onSnapshot, query, orderBy };
+
+// ── FIREBASE CRUD HELPERS ──
+window.fbSave = async function(colName, id, data) {
+  try {
+    const { doc, setDoc } = window._fbModules;
+    await setDoc(doc(window._db, colName, String(id)), data);
+  } catch(e) { console.error('fbSave error:', e); showToast('⚠️ Save error: ' + e.message); }
+};
+window.fbAdd = async function(colName, data) {
+  try {
+    const { collection, addDoc } = window._fbModules;
+    const ref = await addDoc(collection(window._db, colName), data);
+    return ref.id;
+  } catch(e) { console.error('fbAdd error:', e); showToast('⚠️ Save error: ' + e.message); }
+};
+window.fbDelete = async function(colName, id) {
+  try {
+    const { doc, deleteDoc } = window._fbModules;
+    await deleteDoc(doc(window._db, colName, String(id)));
+  } catch(e) { console.error('fbDelete error:', e); }
+};
+window.fbGetAll = async function(colName) {
+  try {
+    const { collection, getDocs } = window._fbModules;
+    const snap = await getDocs(collection(window._db, colName));
+    return snap.docs.map(d => ({...d.data(), _docId: d.id}));
+  } catch(e) { console.error('fbGetAll error:', e); return []; }
+};
+window.fbListen = function(colName, callback) {
+  const { collection, onSnapshot } = window._fbModules;
+  return onSnapshot(collection(window._db, colName), snap => {
+    const data = snap.docs.map(d => ({...d.data(), _docId: d.id}));
+    callback(data);
+  });
+};
+
+// ── LOAD ALL DATA FROM FIRESTORE ON START ──
+window._fbReady = false;
+async function loadAllFromFirebase() {
+  showLoadingOverlay(true);
+  try {
+    const [recs, secs, insps, accs, rs] = await Promise.all([
+      window.fbGetAll('records'),
+      window.fbGetAll('sections'),
+      window.fbGetAll('inspections'),
+      window.fbGetAll('accounts'),
+      window.fbGetAll('settings'),
+    ]);
+    records     = recs.sort((a,b) => (b.id||0) - (a.id||0));
+    sections    = secs;
+    inspections = insps.sort((a,b) => (b.id||0) - (a.id||0));
+    if (accs.length) ACCOUNTS = accs;
+    // Load report settings if saved
+    const rsSaved = rs.find(x => x._docId === 'report_settings');
+    if (rsSaved) { delete rsSaved._docId; window._savedRS = rsSaved; }
+    window._fbReady = true;
+    // Seed demo data if empty
+    await seedSections(); await seedRecords(); await seedInspections();
+    showLoadingOverlay(false);
+    if (window._wasteUser) { renderDashboard(); }
+  } catch(e) {
+    showLoadingOverlay(false);
+    showToast('⚠️ Firebase load error: ' + e.message);
+    console.error(e);
+  }
+}
+
+// ── REAL-TIME LISTENERS (sync across devices) ──
+window.fbListen('records',     data => { records     = data.sort((a,b)=>(b.id||0)-(a.id||0)); if(window._wasteUser) tryRefreshCurrentPage(); });
+window.fbListen('sections',    data => { sections    = data; if(window._wasteUser) tryRefreshCurrentPage(); });
+window.fbListen('inspections', data => { inspections = data.sort((a,b)=>(b.id||0)-(a.id||0)); if(window._wasteUser) tryRefreshCurrentPage(); });
+window.fbListen('accounts',    data => { if(data.length) ACCOUNTS = data; });
+
+window.tryRefreshCurrentPage = function() {
+  const active = document.querySelector('.page.active');
+  if (!active) return;
+  const id = active.id.replace('page-','');
+  if(id==='dashboard')   renderDashboard();
+  if(id==='sections')    { renderSections(); renderSectionSummary(); }
+  if(id==='records')     renderRecords();
+  if(id==='inspections') renderInspectionLogs();
+  if(id==='reports')     renderReports();
+};
+
+// Start loading
+loadAllFromFirebase();
+
+</script>
+
 <script>
-
-
-
-const REC_KEY  = 'deped_waste_records_v3';
-const SEC_KEY  = 'deped_sections_v1';
-const INS_KEY  = 'deped_inspections_v1';
-// Safe storage wrapper (works even if localStorage is blocked)
+// ── LOCAL FALLBACK (accounts still use localStorage as backup) ──
 const _store = {};
 function _getItem(k){ try{ return localStorage.getItem(k); }catch(e){ return _store[k]||null; } }
 function _setItem(k,v){ try{ localStorage.setItem(k,v); }catch(e){} _store[k]=v; }
-let records     = JSON.parse(_getItem(REC_KEY) || '[]');
-let sections    = JSON.parse(_getItem(SEC_KEY) || '[]');
-let inspections = JSON.parse(_getItem(INS_KEY) || '[]');
-function saveRecords()     { _setItem(REC_KEY, JSON.stringify(records)); }
-function saveSections()    { _setItem(SEC_KEY, JSON.stringify(sections)); }
-function saveInspections() { _setItem(INS_KEY, JSON.stringify(inspections)); }
+
+let records     = [];
+let sections    = [];
+let inspections = [];
+
+// ── FIREBASE SAVE WRAPPERS ──
+function saveRecords()     { /* handled by real-time listener */ }
+function saveSections()    { /* handled by real-time listener */ }
+function saveInspections() { /* handled by real-time listener */ }
 const CHECKLIST = [
   {
     id:'segregation', title:'🟢🔵🟡🔴 Proper Waste Segregation', items:[
@@ -1519,24 +1648,34 @@ function initClState() {
   CHECKLIST.forEach(g => g.items.forEach(it => { clState[it.id] = {v: null, remark: ''}; }));
 }
 initClState();
-function seedSections() {
+async function seedSections() {
   if (sections.length) return;
-  [{grade:'Grade 7',name:'Narra',adviser:'Ms. Maria Santos',remarks:''},{grade:'Grade 7',name:'Molave',adviser:'Mr. Jose Reyes',remarks:''},{grade:'Grade 8',name:'Mahogany',adviser:'Ms. Ana Cruz',remarks:''},{grade:'Grade 8',name:'Acacia',adviser:'Mr. Pedro Dela Torre',remarks:'Science class'},{grade:'Grade 9',name:'Sampaguita',adviser:'Ms. Lina Villanueva',remarks:''},{grade:'Grade 9',name:'Ilang-ilang',adviser:'Mr. Carlos Bautista',remarks:''},{grade:'Grade 10',name:'Mariposa',adviser:'Ms. Rosa Aquino',remarks:''},]
-  .forEach(d => sections.push({id:Date.now()+Math.random(),...d}));
-  saveSections();
+  const defaults = [{grade:'Grade 7',name:'Narra',adviser:'Ms. Maria Santos',remarks:''},{grade:'Grade 7',name:'Molave',adviser:'Mr. Jose Reyes',remarks:''},{grade:'Grade 8',name:'Mahogany',adviser:'Ms. Ana Cruz',remarks:''},{grade:'Grade 8',name:'Acacia',adviser:'Mr. Pedro Dela Torre',remarks:'Science class'},{grade:'Grade 9',name:'Sampaguita',adviser:'Ms. Lina Villanueva',remarks:''},{grade:'Grade 9',name:'Ilang-ilang',adviser:'Mr. Carlos Bautista',remarks:''},{grade:'Grade 10',name:'Mariposa',adviser:'Ms. Rosa Aquino',remarks:''},];
+  for (const d of defaults) {
+    const id = Date.now()+Math.random();
+    const sec = {id, ...d};
+    sections.push(sec);
+    await window.fbSave('sections', String(id), sec);
+  }
 }
-function seedRecords() {
+async function seedRecords() {
   if (records.length) return;
   const today = new Date();
-  sections.slice(0,5).forEach((s,i)=>{
-    for(let d=0;d<5;d++){const dt=new Date(today);dt.setDate(dt.getDate()-d*3-i);records.push({id:Date.now()-i*100000-d*1000,date:dt.toISOString().slice(0,10),grade:s.grade,section:s.name,teacher:s.adviser,green:+(Math.random()*8+1).toFixed(1),blue:+(Math.random()*6+0.5).toFixed(1),yellow:+(Math.random()*4+0.3).toFixed(1),red:+(Math.random()*1+0.1).toFixed(1),notes:''});}
-  });
-  saveRecords();
+  for (let i=0; i<sections.slice(0,5).length; i++) {
+    const s = sections[i];
+    for(let d=0;d<5;d++){
+      const dt=new Date(today); dt.setDate(dt.getDate()-d*3-i);
+      const rec = {id:Date.now()-i*100000-d*1000,date:dt.toISOString().slice(0,10),grade:s.grade,section:s.name,teacher:s.adviser,green:+(Math.random()*8+1).toFixed(1),blue:+(Math.random()*6+0.5).toFixed(1),yellow:+(Math.random()*4+0.3).toFixed(1),red:+(Math.random()*1+0.1).toFixed(1),notes:''};
+      records.push(rec);
+      await window.fbSave('records', String(rec.id), rec);
+    }
+  }
 }
-function seedInspections() {
+async function seedInspections() {
   if (inspections.length) return;
   const today = new Date();
-  sections.slice(0,4).forEach((s,i) => {
+  for (let i=0; i<sections.slice(0,4).length; i++) {
+    const s = sections[i];
     const dt = new Date(today); dt.setDate(dt.getDate()-i*4);
     const items = {};
     CHECKLIST.forEach(g => g.items.forEach(it => {
@@ -1545,11 +1684,11 @@ function seedInspections() {
     const pass = Object.values(items).filter(x=>x.v==='pass').length;
     const total = Object.values(items).length;
     const pct = Math.round(pass/total*100);
-    inspections.push({id:Date.now()-i*50000, date:dt.toISOString().slice(0,10), grade:s.grade, section:s.name, adviser:s.adviser, inspector:'Mr./Ms. Principal', items, remarks:'Demo inspection.', pass, fail:total-pass, na:0, pct, result:pct>=80?'Compliant':pct>=60?'Needs Improvement':'Non-Compliant'});
-  });
-  saveInspections();
+    const ins = {id:Date.now()-i*50000, date:dt.toISOString().slice(0,10), grade:s.grade, section:s.name, adviser:s.adviser, inspector:'Mr./Ms. Principal', items, remarks:'Demo inspection.', pass, fail:total-pass, na:0, pct, result:pct>=80?'Compliant':pct>=60?'Needs Improvement':'Non-Compliant'};
+    inspections.push(ins);
+    await window.fbSave('inspections', String(ins.id), ins);
+  }
 }
-seedSections(); seedRecords(); seedInspections();
 const titles = {dashboard:'📊 Dashboard',sections:'🏷️ Sections',add:'📝 Add Record',records:'📋 All Records',inspections:'🔍 Inspection Logs',reports:'📈 Reports',usermgmt:'👥 User Management',reportsettings:'⚙️ Report Settings'};
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1723,7 +1862,7 @@ function resetChecklist() {
   document.getElementById('inspectResult').style.display='none';
   showToast('🔄 Checklist reset.');
 }
-function saveInspection() {
+async function saveInspection() {
   const date=document.getElementById('i_date').value;
   const grade=document.getElementById('i_grade').value;
   const section=document.getElementById('i_section').value;
@@ -1746,7 +1885,9 @@ function saveInspection() {
     inspector,items:JSON.parse(JSON.stringify(clState)),
     remarks,pass,fail,na,pct,result
   };
-  inspections.unshift(rec);saveInspections();
+  showToast('💾 Nagse-save...');
+  await window.fbSave('inspections', String(rec.id), rec);
+  inspections.unshift(rec);
   const res=document.getElementById('inspectResult');
   const banner=document.getElementById('resultBanner');
   res.style.display='block';
@@ -1756,7 +1897,6 @@ function saveInspection() {
   document.getElementById('resultSub').textContent=`${section} (${grade}) | Inspector: ${inspector||'--'} | Date: ${fmtDate(date)}`;
   document.getElementById('resultScore').textContent=pct+'%';
   res.scrollIntoView({behavior:'smooth',block:'start'});
-  // Show email button and pre-fill
   const secObj=sections.find(s=>s.grade===grade&&s.name===section);
   const emailBtn=document.getElementById('btnSendEmail');
   emailBtn.style.display='inline-flex';
@@ -1764,7 +1904,7 @@ function saveInspection() {
   emailBtn._secEmail=secObj&&secObj.email?secObj.email:'';
   showToast('✅ Saved ang inspection!');
 }
-function saveRecord() {
+async function saveRecord() {
   const date=document.getElementById('f_date').value;
   const grade=document.getElementById('f_grade').value;
   const section=document.getElementById('f_section').value;
@@ -1779,7 +1919,9 @@ function saveRecord() {
   if(!section){showToast('❗ Please select a Section.');return;}
   if(green+blue+yellow+red===0){showToast('❗ Please enter waste amounts.');return;}
   const rec={id:Date.now(),date,grade,section,teacher,green,blue,yellow,red,notes};
-  records.unshift(rec);saveRecords();
+  showToast('💾 Nagse-save...');
+  await window.fbSave('records', String(rec.id), rec);
+  records.unshift(rec);
   const total=(green+blue+yellow+red).toFixed(1);
   document.getElementById('addSummaryBody').innerHTML=`
     <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
@@ -1881,15 +2023,26 @@ function renderSectionSummary(){
 }
 function openSectionModal(){editSectionId=null;document.getElementById('sectionModalTitle').textContent='🏷️ New Section';['sm_grade','sm_name','sm_adviser','sm_email','sm_remarks'].forEach(id=>document.getElementById(id).value='');document.getElementById('sectionModal').classList.add('show');}
 function openEditSection(id){const s=sections.find(x=>x.id==id);if(!s)return;editSectionId=id;document.getElementById('sectionModalTitle').textContent='✏️ Edit Section';document.getElementById('sm_grade').value=s.grade;document.getElementById('sm_name').value=s.name;document.getElementById('sm_adviser').value=s.adviser;document.getElementById('sm_email').value=s.email||'';document.getElementById('sm_remarks').value=s.remarks||'';document.getElementById('sectionModal').classList.add('show');}
-function saveSection(){
+async function saveSection(){
   const grade=document.getElementById('sm_grade').value.trim(),name=document.getElementById('sm_name').value.trim(),adviser=document.getElementById('sm_adviser').value.trim(),email=document.getElementById('sm_email').value.trim(),remarks=document.getElementById('sm_remarks').value.trim();
   if(!grade){showToast('❗ Please select a Grade Level.');return;}if(!name){showToast('❗ Ilagay ang pangalan ng section.');return;}if(!adviser){showToast('❗ Ilagay ang pangalan ng adviser.');return;}
-  if(editSectionId){const idx=sections.findIndex(x=>x.id==editSectionId);if(idx>-1)sections[idx]={...sections[idx],grade,name,adviser,email,remarks};}
-  else{if(sections.some(s=>s.grade===grade&&s.name.toLowerCase()===name.toLowerCase())){showToast('❗ A section with that name already exists.');return;}sections.push({id:Date.now(),grade,name,adviser,email,remarks});}
-  saveSections();closeModal('sectionModal');renderSections();renderSectionSummary();showToast(editSectionId?'✅ Updated!':'✅ Section added!');
+  if(editSectionId){
+    const idx=sections.findIndex(x=>x.id==editSectionId);
+    if(idx>-1){sections[idx]={...sections[idx],grade,name,adviser,email,remarks};await window.fbSave('sections',String(editSectionId),sections[idx]);}
+  } else {
+    if(sections.some(s=>s.grade===grade&&s.name.toLowerCase()===name.toLowerCase())){showToast('❗ A section with that name already exists.');return;}
+    const sec={id:Date.now(),grade,name,adviser,email,remarks};
+    sections.push(sec);
+    await window.fbSave('sections',String(sec.id),sec);
+  }
+  closeModal('sectionModal');renderSections();renderSectionSummary();showToast(editSectionId?'✅ Updated!':'✅ Section added!');
 }
 function openDeleteSection(id){deleteSectionId=id;document.getElementById('deleteSectionModal').classList.add('show');}
-function confirmDeleteSection(){sections=sections.filter(s=>s.id!=deleteSectionId);saveSections();closeModal('deleteSectionModal');renderSections();renderSectionSummary();showToast('🗑️ Deleted ang section.');}
+async function confirmDeleteSection(){
+  await window.fbDelete('sections',String(deleteSectionId));
+  sections=sections.filter(s=>s.id!=deleteSectionId);
+  closeModal('deleteSectionModal');renderSections();renderSectionSummary();showToast('🗑️ Deleted ang section.');
+}
 let deleteId=null;
 function updateRecSelBtn(){
   const checked=document.querySelectorAll('.chk-rec:checked');
@@ -1902,17 +2055,19 @@ function toggleAllRecords(chk){
   document.querySelectorAll('.chk-rec').forEach(c=>c.checked=chk.checked);
   updateRecSelBtn();
 }
-function deleteSelectedRecords(){
+async function deleteSelectedRecords(){
   const ids=[...document.querySelectorAll('.chk-rec:checked')].map(c=>+c.dataset.id);
   if(!ids.length)return;
   if(!confirm(`I-delete ang ${ids.length} napiling record?`))return;
+  for(const id of ids) await window.fbDelete('records',String(id));
   records=records.filter(r=>!ids.includes(r.id));
-  saveRecords();renderRecords();showToast(`🗑️ ${ids.length} record(s) deleted.`);
+  renderRecords();showToast(`🗑️ ${ids.length} record(s) deleted.`);
 }
-function clearAllRecords(){
+async function clearAllRecords(){
   if(!records.length){showToast('Walang records.');return;}
   if(!confirm(`I-clear ang LAHAT ng ${records.length} records? Hindi na ito mababalik!`))return;
-  records=[];saveRecords();renderRecords();showToast('🧹 Lahat ng records ay na-clear!');
+  for(const r of records) await window.fbDelete('records',String(r.id));
+  records=[];renderRecords();showToast('🧹 Lahat ng records ay na-clear!');
 }
 function renderRecords(){
   const q=(document.getElementById('searchInput').value||'').toLowerCase();
@@ -1932,7 +2087,7 @@ function renderRecords(){
   updateRecSelBtn();
 }
 function openDelete(id){deleteId=id;document.getElementById('deleteModal').classList.add('show');}
-function confirmDelete(){records=records.filter(r=>r.id!==deleteId);saveRecords();closeModal('deleteModal');renderRecords();showToast('🗑️ Deleted ang record.');}
+async function confirmDelete(){await window.fbDelete('records',String(deleteId));records=records.filter(r=>r.id!==deleteId);closeModal('deleteModal');renderRecords();showToast('🗑️ Deleted ang record.');}
 let deleteInspId=null;
 function updateInspSelBtn(){
   const checked=document.querySelectorAll('.chk-insp:checked');
@@ -1945,17 +2100,19 @@ function toggleAllInsp(chk){
   document.querySelectorAll('.chk-insp').forEach(c=>c.checked=chk.checked);
   updateInspSelBtn();
 }
-function deleteSelectedInsp(){
+async function deleteSelectedInsp(){
   const ids=[...document.querySelectorAll('.chk-insp:checked')].map(c=>+c.dataset.id);
   if(!ids.length)return;
   if(!confirm(`I-delete ang ${ids.length} napiling inspection log?`))return;
+  for(const id of ids) await window.fbDelete('inspections',String(id));
   inspections=inspections.filter(x=>!ids.includes(x.id));
-  saveInspections();renderInspectionLogs();showToast(`🗑️ ${ids.length} inspection(s) deleted.`);
+  renderInspectionLogs();showToast(`🗑️ ${ids.length} inspection(s) deleted.`);
 }
-function clearAllInsp(){
+async function clearAllInsp(){
   if(!inspections.length){showToast('Walang inspection logs.');return;}
   if(!confirm(`I-clear ang LAHAT ng ${inspections.length} inspection logs? Hindi na ito mababalik!`))return;
-  inspections=[];saveInspections();renderInspectionLogs();showToast('🧹 Lahat ng logs ay na-clear!');
+  for(const x of inspections) await window.fbDelete('inspections',String(x.id));
+  inspections=[];renderInspectionLogs();showToast('🧹 Lahat ng logs ay na-clear!');
 }
 function renderInspectionLogs(){
   const q=(document.getElementById('inspSearch').value||'').toLowerCase();
@@ -1994,7 +2151,7 @@ function renderInspectionLogs(){
   updateInspSelBtn();
 }
 function openDeleteInsp(id){deleteInspId=id;document.getElementById('deleteInspModal').classList.add('show');}
-function confirmDeleteInsp(){inspections=inspections.filter(x=>x.id!==deleteInspId);saveInspections();closeModal('deleteInspModal');renderInspectionLogs();showToast('🗑️ Inspection deleted.');}
+async function confirmDeleteInsp(){await window.fbDelete('inspections',String(deleteInspId));inspections=inspections.filter(x=>x.id!==deleteInspId);closeModal('deleteInspModal');renderInspectionLogs();showToast('🗑️ Inspection deleted.');}
 function viewInspection(id){
   const x=inspections.find(i=>i.id===id);if(!x)return;
   const pct=x.pct;
@@ -2036,10 +2193,7 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2700);}
 const ACCOUNTS_KEY = 'deped_accounts_v1';
 function loadAccounts(){
-  try{
-    const saved = _getItem(ACCOUNTS_KEY);
-    if(saved){ const a=JSON.parse(saved); if(a&&a.length) return a; }
-  }catch(e){}
+  // Will be overridden by Firebase data once loaded
   return [
     {username:'admin',   password:'admin123',   role:'Administrator', label:'👑 Admin'},
     {username:'teacher', password:'teacher123', role:'Teacher',       label:'👩‍🏫 Teacher'},
@@ -2047,7 +2201,7 @@ function loadAccounts(){
   ];
 }
 let ACCOUNTS = loadAccounts();
-function saveAccounts(){ _setItem(ACCOUNTS_KEY, JSON.stringify(ACCOUNTS)); }
+function saveAccounts(){ /* handled by Firebase */ }
 function toggleLoginPass(btn){
   const inp=document.getElementById('loginPass');
   const isText=inp.type==='text';
@@ -2654,7 +2808,7 @@ function toggleUmPass(btn){
   inp.type=isText?'password':'text';
   btn.textContent=isText?'👁':'🙈';
 }
-function saveUser(){
+async function saveUser(){
   const idx=parseInt(document.getElementById('umEditIndex').value);
   const username=document.getElementById('umUsername').value.trim();
   const password=document.getElementById('umPassword').value;
@@ -2672,21 +2826,23 @@ function saveUser(){
     if(ACCOUNTS.find(a=>a.username===username)){
       errEl.textContent='❗ Mayroon nang account na may ganoong username.';errEl.style.display='block';return;
     }
-    ACCOUNTS.push({username,password,role,label});
+    const acc={username,password,role,label};
+    ACCOUNTS.push(acc);
+    await window.fbSave('accounts',username,acc);
     showToast('✅ User added: '+username);
   }else{
     ACCOUNTS[idx]={...ACCOUNTS[idx],password,role,label};
+    await window.fbSave('accounts',username,ACCOUNTS[idx]);
     showToast('✅ User updated: '+username);
   }
-  saveAccounts();
   renderUserTable();
   resetUmForm();
 }
-function deleteUser(i){
+async function deleteUser(i){
   const a=ACCOUNTS[i];
   if(!confirm('Delete user "'+a.username+'"? Hindi na ito mababalik.')) return;
+  await window.fbDelete('accounts',a.username);
   ACCOUNTS.splice(i,1);
-  saveAccounts();
   renderUserTable();
   resetUmForm();
   showToast('🗑️ User deleted: '+a.username);
@@ -2710,9 +2866,11 @@ const RS_DEFAULT = {
   ]
 };
 function loadRS(){
-  try{ const s=_getItem(RS_KEY); return s?JSON.parse(s):RS_DEFAULT; }catch(e){ return RS_DEFAULT; }
+  // Use Firebase-loaded settings if available, otherwise default
+  if(window._savedRS) return window._savedRS;
+  return RS_DEFAULT;
 }
-function saveReportSettings(){
+async function saveReportSettings(){
   const rs={
     schoolName: document.getElementById('rs_schoolName').value.trim()||RS_DEFAULT.schoolName,
     address:    document.getElementById('rs_address').value.trim(),
@@ -2723,7 +2881,8 @@ function saveReportSettings(){
     semester:   document.getElementById('rs_semester').value.trim()||RS_DEFAULT.semester,
     signatories: window._rsSignatories||[],
   };
-  _setItem(RS_KEY, JSON.stringify(rs));
+  window._savedRS = rs;
+  await window.fbSave('settings','report_settings', rs);
   showToast('✅ Report settings saved!');
 }
 function initReportSettings(){
